@@ -1,5 +1,5 @@
 # Le secret de la pierre d'azur
-Chasse au trésor du secret de la pierre d'azur.
+Chasse au trésor du secret de la pierre d'azur, accessible depuis l'URL [http://pierre-azur.sc2dero1876.universe.wf/](http://pierre-azur.sc2dero1876.universe.wf/).
 
 ## Architecture du projet
 
