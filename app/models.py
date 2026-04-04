@@ -75,3 +75,26 @@ class Progress(db.Model):
         """Marque l'énigme comme résolue et calcule le temps."""
         self.end = datetime.utcnow()
         self.time = int((self.end - self.start).total_seconds())
+
+#Indique les manches débloquées
+class Config(db.Model):
+    """Table clé/valeur pour la configuration globale de l'application."""
+    __tablename__ = "config"
+
+    key   = db.Column(db.String(80), primary_key=True)
+    value = db.Column(db.String(255), nullable=False)
+
+    @staticmethod
+    def get(key, default=None):
+        entry = Config.query.get(key)
+        return entry.value if entry else default
+
+    @staticmethod
+    def set(key, value):
+        entry = Config.query.get(key)
+        if entry:
+            entry.value = str(value)
+        else:
+            entry = Config(key=key, value=str(value))
+            db.session.add(entry)
+        db.session.commit()

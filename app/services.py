@@ -2,7 +2,7 @@ import unicodedata
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 
-from .models import User, Enigme, Progress
+from .models import User, Enigme, Progress, Config
 from .extensions import db
 
 # ── Normalisation ──────────────────────────────────────────────────────────────
@@ -28,10 +28,16 @@ def get_user_by_name(name):
 # ── Manches ────────────────────────────────────────────────────────────────────
 
 def get_manches_debloquees():
-    """Retourne la liste des numéros de manches débloquées (ex: [1, 2])."""
-    # Pour l'instant on gère ça avec une config simple en base — étape admin plus tard
-    # On considère la manche 1 toujours débloquée pour les tests
-    return [1]
+    """Lit les manches débloquées depuis la table Config."""
+    valeur = Config.get("manches_debloquees", default="")
+    if not valeur:
+        return []
+    return [int(m) for m in valeur.split(",") if m.strip().isdigit()]
+
+
+def set_manches_debloquees(liste_manches):
+    """Sauvegarde la liste des manches débloquées. Ex: [1, 2]"""
+    Config.set("manches_debloquees", ",".join(str(m) for m in liste_manches))
 
 def get_enigmes_par_manche(manche):
     """Retourne les énigmes d'une manche, triées par numéro."""
@@ -167,3 +173,67 @@ def verifier_reponse(user, enigme, reponse_user):
 
     db.session.commit()
     return progress, is_correct
+
+# ── Admin ──────────────────────────────────────────────────────────────────────
+
+def get_tous_les_joueurs():
+    """Retourne tous les users avec le rôle player."""
+    return User.query.filter_by(role="player").order_by(User.name).all()
+
+def get_vue_globale():
+    """
+    Retourne la progression de tous les joueurs sur toutes les énigmes.
+    [
+        {
+            "user": <User>,
+            "total_resolues": int,
+            "total_enigmes": int,
+            "progression": { manche: { enigme: <Progress|None> } }
+        },
+        ...
+    ]
+    """
+    joueurs = get_tous_les_joueurs()
+    toutes_enigmes = Enigme.query.order_by(Enigme.manche, Enigme.enigme).all()
+    total = len(toutes_enigmes)
+    result = []
+
+    for joueur in joueurs:
+        progression = {}
+        resolues = 0
+
+        for enigme in toutes_enigmes:
+            progress = Progress.query.filter_by(
+                user_id=joueur.id,
+                enigme_id=enigme.id
+            ).first()
+
+            if enigme.manche not in progression:
+                progression[enigme.manche] = {}
+            progression[enigme.manche][enigme.enigme] = progress
+
+            if progress and progress.is_solved:
+                resolues += 1
+
+        result.append({
+            "user": joueur,
+            "total_resolues": resolues,
+            "total_enigmes": total,
+            "progression": progression
+        })
+
+    return result
+
+def creer_joueur(name, password):
+    """Crée un nouveau joueur. Retourne (user, erreur)."""
+    if User.query.filter_by(name=name).first():
+        return None, "Ce nom est déjà pris."
+    user = User(name=name, password=hash_password(password), role="player")
+    db.session.add(user)
+    db.session.commit()
+    return user, None
+
+def reinitialiser_progression(user_id):
+    """Supprime tous les Progress d'un joueur."""
+    Progress.query.filter_by(user_id=user_id).delete()
+    db.session.commit()

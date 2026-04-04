@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}Administration — Le secret de la Pierre d'Azur{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <div class="header">
+        <h1>Administration</h1>
+        <p class="subtitle">Le Secret de la Pierre d'Azur</p>
+    </div>
+
+    <!-- ── Manches ── -->
+    <div class="admin-section">
+        <h2>Manches</h2>
+        <div class="carte">
+            {% for manche in [1, 2, 3] %}
+            <div class="manche-toggle">
+                <div>
+                    <span style="font-family:'Cinzel',serif; font-size:0.9rem;">
+                        Manche {{ manche }}
+                    </span>
+                    <div style="font-size:0.8rem; margin-top:0.1rem;">
+                        {% if manche in manches_dispo %}
+                            <span class="text-azur">Déverrouillée</span>
+                        {% else %}
+                            <span class="text-muted">Verrouillée</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if manche in manches_dispo %}
+                    <a href="{{ url_for('admin.toggle_manche', manche=manche, action='rebloquer') }}"
+                       class="btn btn-outline btn-sm">Verrouiller</a>
+                {% else %}
+                    <a href="{{ url_for('admin.toggle_manche', manche=manche, action='debloquer') }}"
+                       class="btn btn-azur btn-sm">Déverrouiller</a>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- ── Progression globale ── -->
+    <div class="admin-section">
+        <h2>Progression globale</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Énigme</th>
+                        {% for item in vue %}
+                            <th>{{ item.user.name }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for manche in [1, 2, 3] %}
+                        {% for enigme in range(1, 6) %}
+                        <tr>
+                            <td style="color:var(--texte-muted);">
+                                M{{ manche }}·E{{ enigme }}
+                            </td>
+                            {% for item in vue %}
+                                {% set p = item.progression.get(manche, {}).get(enigme) %}
+                                <td>
+                                    {% if p and p.is_solved %}
+                                        <span class="td-solved">✓ {{ p.end.strftime('%H:%M') }}</span>
+                                    {% elif p %}
+                                        <span class="td-active">⟳ {{ p.start.strftime('%H:%M') }}</span>
+                                    {% else %}
+                                        <span class="td-empty">—</span>
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    {% endfor %}
+                    <tr style="border-top: 1px solid var(--bordure);">
+                        <td style="font-family:'Cinzel',serif; font-size:0.75rem; color:var(--or);">
+                            Total
+                        </td>
+                        {% for item in vue %}
+                            <td style="font-family:'Cinzel',serif; color:var(--or-light);">
+                                {{ item.total_resolues }}/{{ item.total_enigmes }}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Réinitialisations -->
+        <div class="carte mt-2">
+            <h2 style="font-size:0.75rem; margin-bottom:0.75rem;">Réinitialiser un joueur</h2>
+            {% for item in vue %}
+            <div class="manche-toggle">
+                <span style="font-family:'Crimson Text',serif;">{{ item.user.name }}</span>
+                <form method="POST"
+                      action="{{ url_for('admin.reinitialiser_route', user_id=item.user.id) }}"
+                      onsubmit="return confirm('Réinitialiser {{ item.user.name }} ?')">
+                    <button type="submit" class="btn btn-danger-outline">
+                        Réinitialiser
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+        <!-- ── Créer un joueur ── -->
+    <div class="admin-section">
+        <h2>Créer un joueur</h2>
+        <div class="carte">
+            <form method="POST" action="{{ url_for('admin.creer_joueur_route') }}">
+                <div class="form-group">
+                    <label for="name">Nom</label>
+                    <input type="text" id="name" name="name" placeholder="Nom du joueur…" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <input type="password" id="password" name="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-or">Créer le joueur</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

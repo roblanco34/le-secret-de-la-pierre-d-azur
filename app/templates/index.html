@@ -1,47 +1,78 @@
 {% extends "base.html" %}
-{% block title %}Tableau de bord{% endblock %}
+{% block title %}La Quête — La Pierre d'Azur{% endblock %}
 
 {% block content %}
-<h1>Bienvenue, {{ current_user.name }} !</h1>
+<div class="container">
 
-{% for manche, data in progression.items() %}
-<section>
-    <h2>
-        Manche {{ manche }}
-        {% if not data.debloquee %}
-            🔒 Non débloquée
-        {% endif %}
-    </h2>
-
-    {% for item in data.enigmes %}
-    {% set e = item.enigme %}
-    {% set p = item.progress %}
-
-    <div>
-        <strong>{{ e.enigme }}. {{ e.name }}</strong>
-
-        {% if p and p.is_solved %}
-            ✅ Résolue en {{ p.time }}s ({{ p.attempt }} tentative(s))
-
-        {% elif item.accessible %}
-            {% if p %}
-                🔄 En cours — {{ p.attempt }} tentative(s)
-            {% else %}
-                ⬜ À commencer
-            {% endif %}
-            <a href="{{ url_for('game.enigme', enigme_id=e.id) }}">
-                {{ "Continuer" if p else "Commencer" }}
-            </a>
-
-        {% else %}
-            🔒 Verrouillée
-
-        {% endif %}
+    <div class="header">
+        <h1>La Quête</h1>
+        <p class="subtitle">Bienvenue, {{ current_user.name }}</p>
     </div>
 
-    {% endfor %}
-</section>
-{% endfor %}
+    {% for manche, data in progression.items() %}
+    <div class="carte {% if not data.debloquee %}manche-locked{% endif %} mb-2">
 
-<a href="{{ url_for('auth.logout') }}">Se déconnecter</a>
+        <div class="manche-header">
+            <span class="manche-numero">Manche {{ manche }}</span>
+            <div class="manche-title">
+                {% if not data.debloquee %}
+                    <span class="text-muted" style="font-size:0.9rem; font-style:italic;">
+                        En attente de déverrouillage…
+                    </span>
+                {% else %}
+                    {% set resolues = data.enigmes | selectattr('progress') | selectattr('progress.is_solved') | list | length %}
+                    <span class="text-muted" style="font-size:0.85rem;">
+                        {{ resolues }}/{{ data.enigmes|length }} résolues
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+
+        {% for item in data.enigmes %}
+        {% set e = item.enigme %}
+        {% set p = item.progress %}
+        <div class="enigme-item">
+
+            <div class="enigme-status
+                {% if p and p.is_solved %}status-solved
+                {% elif item.accessible %}status-active
+                {% else %}status-locked{% endif %}">
+                {% if p and p.is_solved %}✓
+                {% elif item.accessible %}›
+                {% else %}✕{% endif %}
+            </div>
+
+            <div class="enigme-info">
+                <div class="enigme-name">{{ e.name }}</div>
+                <div class="enigme-meta">
+                    {% if p and p.is_solved %}
+                        Résolue en {{ p.time | minutes }} · {{ p.attempt }} tentative(s)
+                    {% elif p %}
+                        En cours · {{ p.attempt }} tentative(s)
+                    {% elif not data.debloquee %}
+                        Manche verrouillée
+                    {% elif not item.accessible %}
+                        Terminer l'énigme précédente
+                    {% else %}
+                        Prête à commencer
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="enigme-action">
+                {% if item.accessible and not (p and p.is_solved) %}
+                    <a href="{{ url_for('game.enigme', enigme_id=e.id) }}"
+                       class="btn btn-azur btn-sm">
+                        {{ "Continuer" if p else "Commencer" }}
+                    </a>
+                {% endif %}
+            </div>
+
+        </div>
+        {% endfor %}
+
+    </div>
+    {% endfor %}
+
+</div>
 {% endblock %}

@@ -1,0 +1,576 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+/* ── Variables ──────────────────────────────────────────────────────────────── */
+:root {
+    --azur:        #4EAEE8;
+    --azur-glow:   #7ECFFF;
+    --azur-dark:   #1A5F8A;
+    --or:          #C9A84C;
+    --or-light:    #E8C97A;
+    --fond:        #0A0E14;
+    --fond-carte:  #111820;
+    --fond-input:  #0D1520;
+    --texte:       #D4C9B0;
+    --texte-muted: #7A8A9A;
+    --bordure:     #1E3348;
+    --bordure-or:  #3A2E18;
+    --succes:      #2E7D52;
+    --danger:      #7D2E2E;
+    --warning:     #7D5C1A;
+}
+
+/* ── Reset & Base ───────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+
+body {
+    font-family: 'Crimson Text', Georgia, serif;
+    background-color: var(--fond);
+    color: var(--texte);
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    background-image:
+        radial-gradient(ellipse at 50% 0%, #0D2340 0%, transparent 60%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+}
+
+/* ── Typographie ────────────────────────────────────────────────────────────── */
+h1, h2, h3, .titre {
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.05em;
+    color: var(--or-light);
+}
+
+h1 { font-size: 1.5rem; font-weight: 700; }
+h2 { font-size: 1.15rem; font-weight: 600; }
+h3 { font-size: 1rem; font-weight: 600; }
+
+p { line-height: 1.7; font-size: 1.05rem; }
+
+a { color: var(--azur); text-decoration: none; }
+a:hover { color: var(--azur-glow); }
+
+/* ── Layout ─────────────────────────────────────────────────────────────────── */
+.container {
+    padding: 1.25rem 1rem;
+    min-height: 100vh;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────────── */
+.header {
+    text-align: center;
+    padding: 1.5rem 1rem 1rem;
+    border-bottom: 1px solid var(--bordure);
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.header::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--azur), transparent);
+    margin: 0.75rem auto 0;
+}
+
+.header .subtitle {
+    font-family: 'Crimson Text', serif;
+    font-style: italic;
+    color: var(--texte-muted);
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+}
+
+.logo-azur {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: var(--azur);
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    margin: 0 0.4rem;
+    vertical-align: middle;
+    box-shadow: 0 0 8px var(--azur);
+}
+
+/* ── Navbar ─────────────────────────────────────────────────────────────────── */
+.nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: var(--fond-carte);
+    border-bottom: 1px solid var(--bordure);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.nav-brand {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    color: var(--or);
+    letter-spacing: 0.08em;
+}
+
+.nav-links { display: flex; gap: 1rem; align-items: center; }
+
+.nav-links a {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    color: var(--texte-muted);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.nav-links a:hover { color: var(--azur); }
+
+/* ── Cartes ─────────────────────────────────────────────────────────────────── */
+.carte {
+    background: var(--fond-carte);
+    border: 1px solid var(--bordure);
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.carte::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--bordure), transparent);
+}
+
+.carte-or {
+    border-color: var(--bordure-or);
+}
+
+.carte-or::before {
+    background: linear-gradient(90deg, transparent, var(--or), transparent);
+}
+
+.carte-azur {
+    border-color: var(--azur-dark);
+}
+
+.carte-azur::before {
+    background: linear-gradient(90deg, transparent, var(--azur), transparent);
+}
+
+/* ── Flash messages ─────────────────────────────────────────────────────────── */
+.flash-container { padding: 0 1rem; margin-bottom: 1rem; }
+
+.flash {
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+    border-left: 3px solid;
+    font-family: 'Crimson Text', serif;
+}
+
+.flash-success {
+    background: rgba(46, 125, 82, 0.15);
+    border-color: #2E7D52;
+    color: #6EC99A;
+}
+
+.flash-danger {
+    background: rgba(125, 46, 46, 0.15);
+    border-color: #7D2E2E;
+    color: #E07070;
+}
+
+.flash-warning {
+    background: rgba(125, 92, 26, 0.15);
+    border-color: #7D5C1A;
+    color: #D4A84C;
+}
+
+.flash-info {
+    background: rgba(26, 95, 138, 0.15);
+    border-color: var(--azur-dark);
+    color: var(--azur);
+}
+
+/* ── Formulaires ────────────────────────────────────────────────────────────── */
+.form-group { margin-bottom: 1.25rem; }
+
+label {
+    display: block;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    color: var(--texte-muted);
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+    width: 100%;
+    background: var(--fond-input);
+    border: 1px solid var(--bordure);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    color: var(--texte);
+    font-family: 'Crimson Text', serif;
+    font-size: 1.1rem;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus {
+    outline: none;
+    border-color: var(--azur-dark);
+    box-shadow: 0 0 0 2px rgba(78, 174, 232, 0.12);
+}
+
+/* ── Boutons ────────────────────────────────────────────────────────────────── */
+.btn {
+    display: block;
+    width: 100%;
+    padding: 0.85rem 1.5rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    transition: opacity 0.2s, transform 0.1s;
+}
+
+.btn:active { transform: scale(0.98); }
+
+.btn-azur {
+    background: linear-gradient(135deg, #1A5F8A, #2E8FC4);
+    color: #E8F4FC;
+    border: 1px solid var(--azur-dark);
+}
+
+.btn-azur:hover { opacity: 0.9; }
+
+.btn-or {
+    background: linear-gradient(135deg, #3A2E18, #5A4820);
+    color: var(--or-light);
+    border: 1px solid var(--bordure-or);
+}
+
+.btn-sm {
+    display: inline-block;
+    width: auto;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.7rem;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--bordure);
+    color: var(--texte-muted);
+}
+
+.btn-outline:hover { border-color: var(--azur-dark); color: var(--azur); }
+
+.btn-danger-outline {
+    background: transparent;
+    border: 1px solid #7D2E2E;
+    color: #E07070;
+    font-size: 0.7rem;
+    padding: 0.4rem 0.9rem;
+}
+
+/* ── Page Login ─────────────────────────────────────────────────────────────── */
+.login-header {
+    text-align: center;
+    padding: 2.5rem 1rem 2rem;
+}
+
+.login-header .gemme {
+    display: block;
+    width: 48px; height: 48px;
+    margin: 0 auto 1rem;
+    background: var(--azur);
+    clip-path: polygon(50% 0%, 100% 35%, 85% 100%, 15% 100%, 0% 35%);
+    box-shadow: 0 0 20px rgba(78, 174, 232, 0.4);
+}
+
+.login-header h1 { font-size: 1.2rem; margin-bottom: 0.25rem; }
+.login-header .sous-titre {
+    font-style: italic;
+    color: var(--texte-muted);
+    font-size: 0.9rem;
+}
+
+/* ── Page Index — Manches ───────────────────────────────────────────────────── */
+.manche-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.manche-numero {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    color: var(--or);
+    background: rgba(201, 168, 76, 0.1);
+    border: 1px solid var(--bordure-or);
+    border-radius: 4px;
+    padding: 0.2rem 0.6rem;
+    white-space: nowrap;
+}
+
+.manche-locked .manche-numero {
+    color: var(--texte-muted);
+    background: rgba(255,255,255,0.03);
+    border-color: var(--bordure);
+}
+
+.manche-title { flex: 1; }
+
+/* ── Énigme item ────────────────────────────────────────────────────────────── */
+.enigme-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--bordure);
+}
+
+.enigme-item:last-child { border-bottom: none; }
+
+.enigme-status {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 1px solid;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.7rem;
+}
+
+.status-solved {
+    background: rgba(46, 125, 82, 0.2);
+    border-color: #2E7D52;
+    color: #6EC99A;
+}
+
+.status-active {
+    background: rgba(26, 95, 138, 0.2);
+    border-color: var(--azur-dark);
+    color: var(--azur);
+}
+
+.status-locked {
+    background: rgba(255,255,255,0.03);
+    border-color: var(--bordure);
+    color: var(--texte-muted);
+}
+
+.enigme-info { flex: 1; min-width: 0; }
+
+.enigme-name {
+    font-family: 'Crimson Text', serif;
+    font-size: 1rem;
+    color: var(--texte);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.enigme-meta {
+    font-size: 0.8rem;
+    color: var(--texte-muted);
+    margin-top: 0.1rem;
+}
+
+.enigme-action { flex-shrink: 0; }
+
+/* ── Page Énigme ────────────────────────────────────────────────────────────── */
+.enigme-header {
+    text-align: center;
+    padding: 1.5rem 0 1rem;
+    border-bottom: 1px solid var(--bordure);
+    margin-bottom: 1.5rem;
+}
+
+.enigme-badge {
+    display: inline-block;
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--or);
+    border: 1px solid var(--bordure-or);
+    border-radius: 20px;
+    padding: 0.2rem 0.8rem;
+    margin-bottom: 0.75rem;
+}
+
+.enigme-video {
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid var(--bordure);
+    margin-bottom: 1.25rem;
+    background: #000;
+}
+
+.instruction-text {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--texte);
+    padding: 1rem 0;
+    border-top: 1px solid var(--bordure);
+    border-bottom: 1px solid var(--bordure);
+    margin-bottom: 1.5rem;
+    font-style: italic;
+}
+
+.tentatives {
+    text-align: center;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    color: var(--texte-muted);
+    letter-spacing: 0.05em;
+    margin-top: 1rem;
+}
+
+.enigme-resolue {
+    text-align: center;
+    padding: 1.5rem 1rem;
+}
+
+.enigme-resolue .icone {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.enigme-resolue .temps {
+    font-family: 'Cinzel', serif;
+    color: var(--or-light);
+    font-size: 1.1rem;
+    margin: 0.5rem 0;
+}
+
+/* ── Page Admin ─────────────────────────────────────────────────────────────── */
+.admin-section {
+    margin-bottom: 2rem;
+}
+
+.admin-section h2 {
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--texte-muted);
+    border-bottom: 1px solid var(--bordure);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.manche-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--bordure);
+}
+
+.manche-toggle:last-child { border-bottom: none; }
+
+/* ── Table admin ────────────────────────────────────────────────────────────── */
+.table-wrapper {
+    overflow-x: auto;
+    border: 1px solid var(--bordure);
+    border-radius: 8px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+thead {
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid var(--bordure);
+}
+
+th {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--texte-muted);
+    padding: 0.6rem 0.75rem;
+    text-align: left;
+    white-space: nowrap;
+}
+
+td {
+    padding: 0.55rem 0.75rem;
+    border-bottom: 1px solid rgba(30, 51, 72, 0.5);
+    color: var(--texte);
+    font-family: 'Crimson Text', serif;
+    font-size: 0.95rem;
+    white-space: nowrap;
+}
+
+tr:last-child td { border-bottom: none; }
+
+tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+.td-solved { color: #6EC99A; }
+.td-active { color: var(--azur); }
+.td-empty  { color: var(--bordure); }
+
+/* ── Divider ─────────────────────────────────────────────────────────────────── */
+.divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1.5rem 0;
+    color: var(--texte-muted);
+    font-size: 0.8rem;
+}
+
+.divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--bordure);
+}
+
+/* ── Retour link ─────────────────────────────────────────────────────────────── */
+.retour {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: var(--texte-muted);
+    text-transform: uppercase;
+    margin-bottom: 1.25rem;
+}
+
+.retour:hover { color: var(--azur); }
+
+/* ── Utilitaires ─────────────────────────────────────────────────────────────── */
+.text-center { text-align: center; }
+.text-muted  { color: var(--texte-muted); }
+.text-or     { color: var(--or-light); }
+.text-azur   { color: var(--azur); }
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 1.5rem; }
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }

@@ -2,7 +2,8 @@ import os
 from flask import Flask
 from .extensions import db, migrate, login_manager
 from config import config
-from .models import User, Enigme, Progress
+from .models import User, Enigme, Progress 
+
 
 def create_app(config_name=None):
     if config_name is None:
@@ -23,5 +24,25 @@ def create_app(config_name=None):
 
     with app.app_context():
         from . import models  # 👈 indispensable pour Flask-Migrate
+        from .routes import auth_bp, game_bp, admin_bp   # 👈
+        app.register_blueprint(admin_bp)  
+
+    #Affichage du temps en minutes
+    @app.template_filter("minutes")
+    def minutes_filter(secondes):
+        if secondes is None:
+            return "—"
+        m = secondes // 60
+        return f"{m}min"
+    
+    #     #Affichage du temps en minutes et secondes
+    # @app.template_filter("minutes")
+    # def minutes_filter(secondes):
+    #     if secondes is None:
+    #         return "—"
+    #     m = secondes // 60
+    #     s = secondes % 60
+    #     return f"{m}m{s:02d}s"
 
     return app
+

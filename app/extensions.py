@@ -1,6 +1,9 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
+from functools import wraps
+from flask import abort
+from flask_login import current_user
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -14,3 +17,13 @@ login_manager.login_message = "Connecte-toi pour accéder à cette page."
 def load_user(user_id):
     from .models import User          # import ici pour éviter le import circulaire
     return User.query.get(int(user_id))
+
+
+def admin_required(f):
+    """Décorateur qui réserve une route aux admins."""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not current_user.is_authenticated or not current_user.is_admin:
+            abort(403)
+        return f(*args, **kwargs)
+    return decorated

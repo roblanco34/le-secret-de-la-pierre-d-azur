@@ -1,7 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_user, logout_user, login_required, current_user
 
-from .models import Enigme
+from .extensions import admin_required
+from .models import Enigme, User
 from .services import (
     get_user_by_name,
     verify_password,
@@ -9,10 +10,14 @@ from .services import (
     get_or_create_progress,
     verifier_reponse,
     get_manches_debloquees,
-    is_enigme_accessible
+    is_enigme_accessible,
+    get_vue_globale, get_tous_les_joueurs,
+    creer_joueur, reinitialiser_progression,
+    get_manches_debloquees, set_manches_debloquees
 )
 
 
+admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 auth_bp = Blueprint("auth", __name__)
 game_bp = Blueprint("game", __name__)
 
@@ -80,3 +85,66 @@ def enigme(enigme_id):
             flash(f"Mauvaise réponse. Tentative n°{progress.attempt}.", "danger")
 
     return render_template("enigme.html", enigme=e, progress=progress)
+
+# ── Admin ──────────────────────────────────────────────────────────────────────
+
+@admin_bp.route("/")
+@login_required
+@admin_required
+def index():
+    vue = get_vue_globale()
+    manches_dispo = get_manches_debloquees()
+    return render_template("admin.html", vue=vue, manches_dispo=manches_dispo)
+
+
+@admin_bp.route("/manche/<int:manche>/<action>")
+@login_required
+@admin_required
+def toggle_manche(manche, action):
+    """action = 'debloquer' ou 'rebloquer'"""
+    if manche not in [1, 2, 3]:
+        abort(404)
+
+    manches = get_manches_debloquees()
+
+    if action == "debloquer" and manche not in manches:
+        manches.append(manche)
+        manches.sort()
+        flash(f"Manche {manche} débloquée.", "success")
+
+    elif action == "rebloquer" and manche in manches:
+        manches.remove(manche)
+        flash(f"Manche {manche} rebloquée.", "warning")
+
+    set_manches_debloquees(manches)
+    return redirect(url_for("admin.index"))
+
+
+@admin_bp.route("/joueur/creer", methods=["POST"])
+@login_required
+@admin_required
+def creer_joueur_route():
+    name     = request.form.get("name", "").strip()
+    password = request.form.get("password", "").strip()
+
+    if not name or not password:
+        flash("Nom et mot de passe requis.", "danger")
+        return redirect(url_for("admin.index"))
+
+    user, erreur = creer_joueur(name, password)
+    if erreur:
+        flash(erreur, "danger")
+    else:
+        flash(f"Joueur '{user.name}' créé.", "success")
+
+    return redirect(url_for("admin.index"))
+
+
+@admin_bp.route("/joueur/<int:user_id>/reinitialiser", methods=["POST"])
+@login_required
+@admin_required
+def reinitialiser_route(user_id):
+    user = User.query.get_or_404(user_id)
+    reinitialiser_progression(user_id)
+    flash(f"Progression de '{user.name}' réinitialisée.", "warning")
+    return redirect(url_for("admin.index"))

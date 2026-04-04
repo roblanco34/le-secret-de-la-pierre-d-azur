@@ -1,29 +1,59 @@
 {% extends "base.html" %}
-{% block title %}{{ enigme.name }}{% endblock %}
+{% block title %}{{ enigme.name }} — La Pierre d'Azur{% endblock %}
 
 {% block content %}
-<a href="{{ url_for('game.index') }}">← Retour</a>
+<div class="container">
 
-<h1>{{ enigme.name }}</h1>
-<p>Manche {{ enigme.manche }} — Énigme {{ enigme.enigme }}</p>
+    <a href="{{ url_for('game.index') }}" class="retour">← Retour à la carte</a>
 
-{% if enigme.video_url %}
-    <iframe width="560" height="315" src="{{ enigme.video_url }}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-{% endif %}
+    <div class="enigme-header">
+        <div class="enigme-badge">Manche {{ enigme.manche }} · Énigme {{ enigme.enigme }}</div>
+        <h1>{{ enigme.name }}</h1>
+    </div>
 
-<p>{{ enigme.instruction }}</p>
-
-{% if progress.is_solved %}
-    <p>✅ Tu as déjà résolu cette énigme en {{ progress.time }}s !</p>
-{% else %}
-    <form method="POST">
-        <label for="reponse">Ta réponse</label>
-        <input type="text" id="reponse" name="reponse" required autofocus>
-        <button type="submit">Envoyer</button>
-    </form>
-    {% if progress.attempt > 0 %}
-        <p>Tentatives : {{ progress.attempt }}</p>
+    {% if enigme.video_url %}
+    <video class="enigme-video" controls playsinline preload="metadata">
+        <source src="{{ enigme.video_url }}">
+    </video>
     {% endif %}
-{% endif %}
 
+    <p class="instruction-text">{{ enigme.instruction }}</p>
+
+    {% if progress.is_solved %}
+
+    <div class="enigme-resolue carte carte-or">
+        <div class="icone">✦</div>
+        <h2 class="text-or">Énigme résolue !</h2>
+        <p class="temps">{{ progress.time }} secondes</p>
+        <p class="text-muted" style="font-size:0.9rem;">
+            {{ progress.attempt }} tentative(s)
+        </p>
+        <a href="{{ url_for('game.index') }}" class="btn btn-or mt-2">
+            Retour à la carte
+        </a>
+    </div>
+
+    {% else %}
+
+    <form method="POST">
+        <div class="form-group">
+            <label for="reponse">Ta réponse</label>
+            <input type="text" id="reponse" name="reponse"
+                   placeholder="Écris ta réponse…"
+                   autocomplete="off" autocorrect="off"
+                   autocapitalize="off" spellcheck="false"
+                   required autofocus>
+        </div>
+        <button type="submit" class="btn btn-azur">Soumettre la réponse</button>
+    </form>
+
+    {% if progress.attempt > 0 %}
+    <p class="tentatives mt-2">
+        Tentative(s) : {{ progress.attempt }}
+    </p>
+    {% endif %}
+
+    {% endif %}
+
+</div>
 {% endblock %}

@@ -2,20 +2,39 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>{% block title %}La Pierre d'Azur{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-    <!-- Affichage des messages flash -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ category }}">{{ message }}</div>
-            {% endfor %}
+{% if current_user.is_authenticated %}
+<nav class="nav">
+    <span class="nav-brand">
+        <span class="logo-azur"></span>
+        La Pierre d'Azur
+    </span>
+    <div class="nav-links">
+        {% if current_user.is_admin %}
+            <a href="{{ url_for('admin.index') }}">Admin</a>
         {% endif %}
-    {% endwith %}
+        <a href="{{ url_for('game.index') }}">Carte</a>
+        <a href="{{ url_for('auth.logout') }}">Quitter</a>
+    </div>
+</nav>
+{% endif %}
 
-    {% block content %}{% endblock %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-container">
+        {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+{% endwith %}
+
+{% block content %}{% endblock %}
 
 </body>
 </html>
