@@ -1,125 +1,141 @@
 # Le secret de la pierre d'azur
-Chasse au trésor du secret de la pierre d'azur, accessible depuis l'URL [http://pierre-azur.sc2dero1876.universe.wf/](http://pierre-azur.sc2dero1876.universe.wf/).
 
-## Architecture du projet
+> [!NOTE]
+> Prochaine étape : Présenter, valider et ajuster avant le déploiement wsgi vers o2switch.
 
-### Proposition GPT
+## Présentation
+Chasse au trésor **Le secret de la Pierre d'Azur**, accessible depuis l'URL [http://pierre-azur.sc2dero1876.universe.wf/](http://pierre-azur.sc2dero1876.universe.wf/).
+
+Cette application possède 2 profils :
+- `player` : permet de participer aux manches et énigmes, et d'envoyer des réponses.
+- `admin` : permet de créer ou réinitialiser de utilisateurs, voir l'avancement des players et débloquer les manches.
+
+## Documentation
+### Architecture du projet
+
 ```
 le-secret-de-la-pierre-d-azur/
 │
-├── pierre_azur/
-│   ├── __init__.py
-│   ├── routes.py
-│   ├── game.py
-│   ├── models.py
-│   ├── utils.py
-│   │
-│   ├── templates/
-│   │   ├── base.html
-│   │   ├── login.html
-│   │   ├── game.html
-│   │   ├── waiting.html
-│   │   └── video.html
-│   │
-│   └── static/
-│       ├── style.css
-│       └── images/
-│
-├── database.db
-├── config.py
-├── passenger_wsgi.py
-├── requirements.txt
-└── run.py   (dev uniquement)
-```
-
-### Proposition Claude
-
-```
-treasure_hunt/
-│
 ├── app/
-│   ├── __init__.py             # create_app()
-│   ├── extensions.py           # db, login_manager
-│   ├── models/
-│   │   ├── __init__.py
-│   │   ├── user.py             # User (id, name, password, role)
-│   │   ├── enigme.py           # Enigme (id, manche, enigme, name, instruction, response)
-│   │   └── progress.py         # Progress (id, user_id, enigme_id, attempt, start, end, time)
-│   ├── routes/
-│   │   ├── __init__.py
-│   │   ├── auth.py             # /login, /logout
-│   │   ├── game.py             # /index, /enigme/<id>
-│   │   └── admin.py            # /admin (plus tard)
-│   ├── services/
-│   │   ├── auth_service.py     # hash/vérif password
-│   │   ├── game_service.py     # logique progression, vérif réponse, normalisation
-│   │   └── admin_service.py    # déblocage des manches (plus tard)
-│   ├── templates/
-│   │   ├── base.html
-│   │   ├── login.html
-│   │   ├── index.html
-│   │   └── enigme.html
-│   └── static/
+│   ├── __init__.py          # create_app() — Application Factory
+│   ├── commands.py          # flask seed
+│   ├── extensions.py        # db, migrate, login_manager, admin_required
+│   ├── models.py            # User, Enigme, Progress, Config
+│   ├── routes.py            # auth_bp, game_bp, admin_bp
+│   ├── services.py          # logique métier (auth, jeu, admin)
+│   ├── static/
+│   │   └── style.css
+│   └── templates/
+│       ├── base.html
+│       ├── login.html
+│       ├── index.html
+│       ├── enigme.html
+│       └── admin.html
 │
-├── migrations/
-├── tests/
-├── config.py
-├── .env
+├── migrations/              # versionning schéma (Flask-Migrate)
+├── instance/
+│   └── database.db          # SQLite (jamais commité)
+├── enigmes.json             # contenu des énigmes (source de vérité)
+├── passenger_wsgi.py        # point d'entrée production (o2switch)
+├── config.py                # DevelopmentConfig / ProductionConfig
 ├── requirements.txt
-└── run.py
+├── .env                     # secrets (jamais commité)
+└── run.py                   # point d'entrée développement
 ```
 
-```
-# User
-id        | Integer  | PK
-name      | String   | unique, not null
-password  | String   | hashed
-role      | String   | "player" | "admin"
+### Les modèles
 
-# Enigme
-id          | Integer  | PK — ordre global dans l'histoire (1→15)
-manche      | Integer  | 1, 2 ou 3
-enigme      | Integer  | 1→5 au sein de la manche
-name        | String
-instruction | Text
-video_url   | String   | (à ajouter)
-response    | String   | stockée normalisée
+```
+┌─────────────────────┐        ┌──────────────────────────┐
+│        User         │        │          Enigme           │
+├─────────────────────┤        ├──────────────────────────┤
+│ id          Integer │        │ id          Integer       │
+│ name        String  │        │ manche      Integer 1-3  │
+│ password    String  │        │ enigme      Integer 1-5  │
+│ role        String  │        │ name        String       │
+│                     │        │ instruction Text         │
+│ is_admin  @property │        │ video_url   String       │
+└──────────┬──────────┘        │ response    String (norm)│
+           │                   └────────────┬─────────────┘
+           │ 1                              │ 1
+           │                               │
+           └──────────────┬────────────────┘
+                          │ N
+               ┌──────────┴──────────┐
+               │       Progress      │
+               ├─────────────────────┤
+               │ id          Integer │
+               │ user_id     FK      │
+               │ enigme_id   FK      │
+               │ attempt     Integer │
+               │ start       DateTime│
+               │ end         DateTime│  ← null si non résolue
+               │ time        Integer │  ← secondes (end-start)
+               │                    │
+               │ is_solved @property│
+               │ solve()   @method  │
+               └────────────────────┘
 
-# Progress
-id          | Integer  | PK
-user_id     | FK → User
-enigme_id   | FK → Enigme
-attempt     | Integer  | default=0, incrémenté à chaque essai
-start       | DateTime | 1er affichage de l'énigme
-end         | DateTime | nullable, rempli à la bonne réponse
-time        | Integer  | secondes (end - start), nullable
+┌─────────────────────┐
+│       Config        │  ← table clé/valeur
+├─────────────────────┤
+│ key         String  │  ex: "manches_debloquees" → "1,2"
+│ value       String  │
+└─────────────────────┘
 ```
 
-#### Flux de jeu — schéma
+### Flux de jeu
+
 ```
-Admin débloque manche N
-        │
-        ▼
-Joueur arrive sur /index
-→ voit les manches débloquées
-→ voit sa progression (énigmes réussies / en cours)
-        │
-        ▼
-Clique sur une énigme → /enigme/<id>
-→ si Progress inexistant : création avec start=now()
-→ affiche vidéo + instruction + input réponse
-        │
-        ▼
-Soumet une réponse
-→ attempt + 1
-→ normalisation (minuscules, sans accents)
-→ comparaison avec enigme.response
-        │
-   ┌────┴────┐
-Bonne       Mauvaise
-réponse     réponse
-   │            │
-end=now()   message d'erreur
-time=calculé    retour formulaire
-redirect /index
+[ Admin ]
+                            │
+                    débloque manche N
+                            │
+                            ▼
+[ Joueur ] ──── /login ──► /index
+                            │
+                  ┌─────────┴──────────┐
+                  │  Carte de la quête │
+                  │  Manche 1          │
+                  │  ✓ Énigme 1        │  ← résolue
+                  │  › Énigme 2        │  ← accessible
+                  │  ✕ Énigme 3        │  ← verrouillée
+                  │  Manche 2  🔒      │  ← non débloquée
+                  └─────────┬──────────┘
+                            │ clique "Commencer / Continuer"
+                            ▼
+                      /enigme/<id>
+                            │
+                   Progress existant ?
+                      │           │
+                     Non         Oui
+                      │           │
+               start = now()     (on reprend)
+                      └─────┬─────┘
+                            │
+                    affiche vidéo
+                    + instruction
+                    + input réponse
+                            │
+                        soumet
+                            │
+                   attempt += 1
+                   normalize(réponse)
+                            │
+                  ┌─────────┴──────────┐
+                 Bonne              Mauvaise
+                réponse             réponse
+                  │                     │
+          end = now()            flash "Mauvaise réponse"
+          time = end - start     retour formulaire
+                  │
+          toutes les énigmes
+          de la manche résolues ?
+                  │
+         ┌────────┴────────┐
+        Non               Oui
+         │                 │
+      /index            /index
+                  (attend manche suivante
+                   ou fin de la chasse)
 ```
