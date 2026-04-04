@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}{{ enigme.name }}{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('game.index') }}">← Retour</a>
+
+<h1>{{ enigme.name }}</h1>
+<p>Manche {{ enigme.manche }} — Énigme {{ enigme.enigme }}</p>
+
+{% if enigme.video_url %}
+    <iframe width="560" height="315" src="{{ enigme.video_url }}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+{% endif %}
+
+<p>{{ enigme.instruction }}</p>
+
+{% if progress.is_solved %}
+    <p>✅ Tu as déjà résolu cette énigme en {{ progress.time }}s !</p>
+{% else %}
+    <form method="POST">
+        <label for="reponse">Ta réponse</label>
+        <input type="text" id="reponse" name="reponse" required autofocus>
+        <button type="submit">Envoyer</button>
+    </form>
+    {% if progress.attempt > 0 %}
+        <p>Tentatives : {{ progress.attempt }}</p>
+    {% endif %}
+{% endif %}
+
+{% endblock %}

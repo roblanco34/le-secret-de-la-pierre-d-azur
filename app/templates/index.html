@@ -1,11 +1,47 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Le secret de la pierre d'azur</title>
-</head>
-<body>
-    <img src="pierre_azur.png" alt="Le secret de la pierre d'azur" style="width: 30%;height:auto;">
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}Tableau de bord{% endblock %}
+
+{% block content %}
+<h1>Bienvenue, {{ current_user.name }} !</h1>
+
+{% for manche, data in progression.items() %}
+<section>
+    <h2>
+        Manche {{ manche }}
+        {% if not data.debloquee %}
+            🔒 Non débloquée
+        {% endif %}
+    </h2>
+
+    {% for item in data.enigmes %}
+    {% set e = item.enigme %}
+    {% set p = item.progress %}
+
+    <div>
+        <strong>{{ e.enigme }}. {{ e.name }}</strong>
+
+        {% if p and p.is_solved %}
+            ✅ Résolue en {{ p.time }}s ({{ p.attempt }} tentative(s))
+
+        {% elif item.accessible %}
+            {% if p %}
+                🔄 En cours — {{ p.attempt }} tentative(s)
+            {% else %}
+                ⬜ À commencer
+            {% endif %}
+            <a href="{{ url_for('game.enigme', enigme_id=e.id) }}">
+                {{ "Continuer" if p else "Commencer" }}
+            </a>
+
+        {% else %}
+            🔒 Verrouillée
+
+        {% endif %}
+    </div>
+
+    {% endfor %}
+</section>
+{% endfor %}
+
+<a href="{{ url_for('auth.logout') }}">Se déconnecter</a>
+{% endblock %}
