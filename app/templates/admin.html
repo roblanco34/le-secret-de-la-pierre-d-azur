@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Administration — Le secret de la Pierre d'Azur{% endblock %}
+{% block title %}Administration | Le secret de la Pierre d'Azur{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -61,11 +61,21 @@
                             </td>
                             {% for item in vue %}
                                 {% set p = item.progression.get(manche, {}).get(enigme) %}
+                                {% set e_obj = item.progression_enigmes.get(manche, {}).get(enigme) %}
                                 <td>
-                                    {% if p and p.is_solved %}
-                                        <span class="td-solved">✓ {{ p.end.strftime('%H:%M') }}</span>
-                                    {% elif p %}
-                                        <span class="td-active">⟳ {{ p.start.strftime('%H:%M') }}</span>
+                                    {% if p %}
+                                    <form method="POST"
+                                        action="{{ url_for('admin.toggler_indice_route', user_id=item.user.id, enigme_id=e_obj.id if e_obj else 0) }}">
+                                        <button type="submit" class="btn-indice
+                                            {% if p.is_solved %}td-solved{% else %}td-active{% endif %}
+                                            {% if p.indice_active %}indice-on{% endif %}">
+                                            {% if p.is_solved %}
+                                                ✓ {{ p.end.strftime('%H:%M') }}
+                                            {% else %}
+                                                ⟳ {{ p.start.strftime('%H:%M') }}
+                                            {% endif %}
+                                        </button>
+                                    </form>
                                     {% else %}
                                         <span class="td-empty">—</span>
                                     {% endif %}
@@ -94,13 +104,19 @@
             {% for item in vue %}
             <div class="manche-toggle">
                 <span style="font-family:'Crimson Text',serif;">{{ item.user.name }}</span>
-                <form method="POST"
-                      action="{{ url_for('admin.reinitialiser_route', user_id=item.user.id) }}"
-                      onsubmit="return confirm('Réinitialiser {{ item.user.name }} ?')">
-                    <button type="submit" class="btn btn-danger-outline">
-                        Réinitialiser
-                    </button>
-                </form>
+                <div style="display:flex; gap:0.5rem;">
+                    <form method="POST"
+                        action="{{ url_for('admin.reinitialiser_route', user_id=item.user.id) }}"
+                        onsubmit="return confirm('Réinitialiser {{ item.user.name }} ?')">
+                        <button type="submit" class="btn btn-danger-outline">Réinitialiser</button>
+                    </form>
+                    <form method="POST"
+                        action="{{ url_for('admin.supprimer_joueur_route', user_id=item.user.id) }}"
+                        onsubmit="return confirm('Supprimer définitivement {{ item.user.name }} ?')">
+                        <button type="submit" class="btn btn-danger-outline"
+                                style="border-color:#5C1A1A; color:#C05050;">Supprimer</button>
+                    </form>
+                </div>
             </div>
             {% endfor %}
         </div>

@@ -34,7 +34,6 @@ def get_manches_debloquees():
         return []
     return [int(m) for m in valeur.split(",") if m.strip().isdigit()]
 
-
 def set_manches_debloquees(liste_manches):
     """Sauvegarde la liste des manches débloquées. Ex: [1, 2]"""
     Config.set("manches_debloquees", ",".join(str(m) for m in liste_manches))
@@ -42,6 +41,9 @@ def set_manches_debloquees(liste_manches):
 def get_enigmes_par_manche(manche):
     """Retourne les énigmes d'une manche, triées par numéro."""
     return Enigme.query.filter_by(manche=manche).order_by(Enigme.enigme).all()
+
+def get_intro_video_url():
+    return Config.get("intro_video_url", default="")
 
 # ── Progress ───────────────────────────────────────────────────────────────────
 
@@ -181,18 +183,6 @@ def get_tous_les_joueurs():
     return User.query.filter_by(role="player").order_by(User.name).all()
 
 def get_vue_globale():
-    """
-    Retourne la progression de tous les joueurs sur toutes les énigmes.
-    [
-        {
-            "user": <User>,
-            "total_resolues": int,
-            "total_enigmes": int,
-            "progression": { manche: { enigme: <Progress|None> } }
-        },
-        ...
-    ]
-    """
     joueurs = get_tous_les_joueurs()
     toutes_enigmes = Enigme.query.order_by(Enigme.manche, Enigme.enigme).all()
     total = len(toutes_enigmes)
@@ -200,6 +190,7 @@ def get_vue_globale():
 
     for joueur in joueurs:
         progression = {}
+        progression_enigmes = {}      # 👈 déclaré ici, réinitialisé à chaque joueur
         resolues = 0
 
         for enigme in toutes_enigmes:
@@ -210,7 +201,10 @@ def get_vue_globale():
 
             if enigme.manche not in progression:
                 progression[enigme.manche] = {}
+                progression_enigmes[enigme.manche] = {}
+
             progression[enigme.manche][enigme.enigme] = progress
+            progression_enigmes[enigme.manche][enigme.enigme] = enigme
 
             if progress and progress.is_solved:
                 resolues += 1
@@ -219,7 +213,8 @@ def get_vue_globale():
             "user": joueur,
             "total_resolues": resolues,
             "total_enigmes": total,
-            "progression": progression
+            "progression": progression,
+            "progression_enigmes": progression_enigmes
         })
 
     return result
@@ -237,3 +232,19 @@ def reinitialiser_progression(user_id):
     """Supprime tous les Progress d'un joueur."""
     Progress.query.filter_by(user_id=user_id).delete()
     db.session.commit()
+
+def supprimer_joueur(user_id):
+    """Supprime un joueur et toute sa progression."""
+    Progress.query.filter_by(user_id=user_id).delete()
+    User.query.filter_by(id=user_id).delete()
+    db.session.commit()
+
+def toggler_indice(user_id, enigme_id):
+    """Active ou désactive l'indice pour un joueur sur une énigme."""
+    progress = Progress.query.filter_by(
+        user_id=user_id,
+        enigme_id=enigme_id
+    ).first()
+    if progress:
+        progress.indice_active = not progress.indice_active
+        db.session.commit()

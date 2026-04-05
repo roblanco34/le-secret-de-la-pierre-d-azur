@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_user, logout_user, login_required, current_user
 
-from .extensions import admin_required
+from .extensions import admin_required, player_required
 from .models import Enigme, User
 from .services import (
     get_user_by_name,
@@ -13,8 +13,10 @@ from .services import (
     is_enigme_accessible,
     get_vue_globale, get_tous_les_joueurs,
     creer_joueur, reinitialiser_progression,
-    get_manches_debloquees, set_manches_debloquees
+    get_manches_debloquees, set_manches_debloquees,
+    get_intro_video_url, toggler_indice, supprimer_joueur
 )
+
 
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
@@ -27,7 +29,10 @@ game_bp = Blueprint("game", __name__)
 def login():
     # Si déjà connecté, on redirige directement
     if current_user.is_authenticated:
-        return redirect(url_for("game.index"))
+        if current_user.is_admin:
+            return redirect(url_for("admin.index"))
+        else:
+            return redirect(url_for("game.index"))
 
     if request.method == "POST":
         name     = request.form.get("name", "").strip()
@@ -36,6 +41,8 @@ def login():
 
         if user and verify_password(user, password):
             login_user(user)
+            if user.is_admin:
+                return redirect(url_for("admin.index"))
             return redirect(url_for("game.index"))
 
         flash("Nom ou mot de passe incorrect.", "danger")
@@ -52,13 +59,16 @@ def logout():
 
 @game_bp.route("/")
 @login_required
+@player_required 
 def index():
     progression = get_progression_user(current_user)
-    return render_template("index.html", progression=progression)
+    intro_video_url = get_intro_video_url()
+    return render_template("index.html", progression=progression, intro_video_url=intro_video_url)
 
 
 @game_bp.route("/enigme/<int:enigme_id>", methods=["GET", "POST"])
 @login_required
+@player_required 
 def enigme(enigme_id):
     e = Enigme.query.get_or_404(enigme_id)
 
@@ -79,7 +89,7 @@ def enigme(enigme_id):
         progress, is_correct = verifier_reponse(current_user, e, reponse_user)
 
         if is_correct:
-            flash(f"Bonne réponse ! Résolue en {progress.time}s.", "success")
+            flash(f"Bonne réponse ! Résolue en {progress.time/60:.0f}min.", "success")
             return redirect(url_for("game.index"))
         else:
             flash(f"Mauvaise réponse. Tentative n°{progress.attempt}.", "danger")
@@ -96,6 +106,12 @@ def index():
     manches_dispo = get_manches_debloquees()
     return render_template("admin.html", vue=vue, manches_dispo=manches_dispo)
 
+@admin_bp.route("/indice/<int:user_id>/<int:enigme_id>", methods=["POST"])
+@login_required
+@admin_required
+def toggler_indice_route(user_id, enigme_id):
+    toggler_indice(user_id, enigme_id)
+    return redirect(url_for("admin.index"))
 
 @admin_bp.route("/manche/<int:manche>/<action>")
 @login_required
@@ -147,4 +163,16 @@ def reinitialiser_route(user_id):
     user = User.query.get_or_404(user_id)
     reinitialiser_progression(user_id)
     flash(f"Progression de '{user.name}' réinitialisée.", "warning")
+    return redirect(url_for("admin.index"))
+
+@admin_bp.route("/joueur/<int:user_id>/supprimer", methods=["POST"])
+@login_required
+@admin_required
+def supprimer_joueur_route(user_id):
+    user = User.query.get_or_404(user_id)
+    if user.is_admin:
+        flash("Impossible de supprimer un administrateur.", "danger")
+        return redirect(url_for("admin.index"))
+    supprimer_joueur(user_id)
+    flash(f"Joueur '{user.name}' supprimé.", "danger")
     return redirect(url_for("admin.index"))

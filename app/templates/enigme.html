@@ -1,10 +1,17 @@
 {% extends "base.html" %}
-{% block title %}{{ enigme.name }} — La Pierre d'Azur{% endblock %}
+{% block title %}{{ enigme.name }} | La Pierre d'Azur{% endblock %}
 
 {% block content %}
 <div class="container">
 
-    <a href="{{ url_for('game.index') }}" class="retour">← Retour à la carte</a>
+    <!-- <a href="{{ url_for('game.index') }}" class="retour">← Retour à la carte</a> -->
+
+    {% if progress and progress.indice_active and enigme.indice %}
+    <div class="indice-bulle">
+        <span class="indice-icone">💡</span>
+        <p>{{ enigme.indice }}</p>
+    </div>
+    {% endif %}
 
     <div class="enigme-header">
         <div class="enigme-badge">Manche {{ enigme.manche }} · Énigme {{ enigme.enigme }}</div>
@@ -12,7 +19,9 @@
     </div>
 
     {% if enigme.video_url %}
-    <iframe width="450" height="315" src="{{ enigme.video_url }}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    <div class="video-wrapper">
+        <iframe width="560" height="315" src="{{ enigme.video_url }}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
     {% endif %}
 
     <p class="instruction-text">{{ enigme.instruction }}</p>

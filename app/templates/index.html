@@ -1,12 +1,16 @@
 {% extends "base.html" %}
-{% block title %}La Quête — La Pierre d'Azur{% endblock %}
+{% block title %}La Quête | La Pierre d'Azur{% endblock %}
 
 {% block content %}
 <div class="container">
 
     <div class="header">
         <h1>La Quête</h1>
-        <p class="subtitle">Bienvenue, {{ current_user.name }}</p>
+        <p class="subtitle">{{ current_user.name }}</p>
+    </div>
+
+    <div class="video-wrapper">
+        <iframe width="560" height="315" src="{{ intro_video_url }}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
     </div>
 
     {% for manche, data in progression.items() %}

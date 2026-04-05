@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>{% block title %}La Pierre d'Azur{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 </head>
 <body>
 
@@ -15,10 +16,12 @@
         La Pierre d'Azur
     </span>
     <div class="nav-links">
+        <a href="javascript:location.reload()" class="nav-refresh" title="Rafraîchir">↺</a>
         {% if current_user.is_admin %}
             <a href="{{ url_for('admin.index') }}">Admin</a>
+        {% else %}
+            <a href="{{ url_for('game.index') }}">Carte</a>
         {% endif %}
-        <a href="{{ url_for('game.index') }}">Carte</a>
         <a href="{{ url_for('auth.logout') }}">Quitter</a>
     </div>
 </nav>

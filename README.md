@@ -136,10 +136,11 @@ le-secret-de-la-pierre-d-azur/
 ```
 
 ## A faire
-- Ajouter vidéo d'introduction du jeu (model Config)
-- AJOUTER LE NB DE TENTATIVE POUR L'ADMIN
-- Ajout bouton Refresh
-- Ajouter la possibilité de supprimer des joueurs (à côté de réinitialiser)
-- Un compte administrateur ne peut pas être joueur
-- Ajouter l'attribut 'indice' dans enigme + l'administrateur peut l'afficher/activer et le rendre visible dans enigme (per user) [clic depuis la progression des joueurs?]
-- Texte : NOM DU CHASSEUR -> NOM DE L'EQUIPE
+- ~~Ajouter vidéo d'introduction du jeu (model Config)~~
+- ~~AJOUTER LE NB DE TENTATIVE POUR L'ADMIN~~
+- ~~Ajout bouton Refresh~~
+- ~~Ajouter la possibilité de supprimer des joueurs (à côté de réinitialiser)~~
+- ~~Un compte administrateur ne peut pas être joueur~~
+- ~~Ajouter l'attribut 'indice' dans enigme + l'administrateur peut l'afficher/activer et le rendre visible dans enigme (per user) [clic depuis la progression des joueurs?]~~
+- ~~Texte : NOM DU CHASSEUR -> NOM DE L'EQUIPE~~
+- Admin : voir les tentatives

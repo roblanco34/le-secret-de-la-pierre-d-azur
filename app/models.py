@@ -31,6 +31,7 @@ class Enigme(db.Model):
     instruction = db.Column(db.Text, nullable=False)
     video_url   = db.Column(db.String(255), nullable=True)
     response    = db.Column(db.String(255), nullable=False)  # stockée normalisée
+    indice      = db.Column(db.Text, nullable=True)
 
     # Relation : une énigme a plusieurs Progress
     progresses = db.relationship("Progress", back_populates="enigme", lazy="dynamic")
@@ -54,7 +55,8 @@ class Progress(db.Model):
     start     = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     end       = db.Column(db.DateTime, nullable=True)   # null = pas encore réussi
     time      = db.Column(db.Integer, nullable=True)    # secondes, null = pas encore réussi
-
+    indice_active = db.Column(db.Boolean, default=False, server_default="0", nullable=False)
+    
     # Relations inverses
     user   = db.relationship("User", back_populates="progresses")
     enigme = db.relationship("Enigme", back_populates="progresses")
