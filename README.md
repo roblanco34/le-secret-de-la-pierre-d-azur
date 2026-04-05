@@ -1,14 +1,14 @@
 # Le secret de la pierre d'azur
 
 > [!NOTE]
-> Prochaine étape : AJOUTER LE NB DE TENTATIVE POUR L'ADMIN + Présenter, valider et ajuster avant le déploiement wsgi vers o2switch.
+> Prochaine étape : AJOUTER LE NB DE TENTATIVE POUR L'ADMIN + Présenter, valider et ajuster avant le déploiement wsgi vers o2switch. Actuellement, l'admin peut participer : ok ?
 
 ## Présentation
 Chasse au trésor **Le secret de la Pierre d'Azur**, accessible depuis l'URL [http://pierre-azur.sc2dero1876.universe.wf/](http://pierre-azur.sc2dero1876.universe.wf/).
 
 Cette application possède 2 profils :
 - `player` : permet de participer aux manches et énigmes, et d'envoyer des réponses.
-- `admin` : permet de créer ou réinitialiser de utilisateurs, voir l'avancement des players et débloquer les manches.
+- `admin` : permet de créer ou réinitialiser des utilisateurs, voir l'avancement des players et débloquer les manches.
 
 ## Documentation
 ### Architecture du projet
@@ -18,7 +18,6 @@ le-secret-de-la-pierre-d-azur/
 │
 ├── app/
 │   ├── __init__.py          # create_app() — Application Factory
-│   ├── commands.py          # flask seed
 │   ├── extensions.py        # db, migrate, login_manager, admin_required
 │   ├── models.py            # User, Enigme, Progress, Config
 │   ├── routes.py            # auth_bp, game_bp, admin_bp
@@ -35,7 +34,6 @@ le-secret-de-la-pierre-d-azur/
 ├── migrations/              # versionning schéma (Flask-Migrate)
 ├── instance/
 │   └── database.db          # SQLite (jamais commité)
-├── enigmes.json             # contenu des énigmes (source de vérité)
 ├── passenger_wsgi.py        # point d'entrée production (o2switch)
 ├── config.py                # DevelopmentConfig / ProductionConfig
 ├── requirements.txt
