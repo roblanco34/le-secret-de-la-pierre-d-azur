@@ -1,7 +1,7 @@
 # Le secret de la pierre d'azur
 
 > [!NOTE]
-> Prochaine étape : AJOUTER LE NB DE TENTATIVE POUR L'ADMIN + Présenter, valider et ajuster avant le déploiement wsgi vers o2switch. Actuellement, l'admin peut participer : ok ?
+> Prochaine étape : AJOUTER LE NB DE TENTATIVE POUR L'ADMIN + Présenter, valider et ajuster avant le déploiement wsgi vers o2switch. Actuellement, l'admin peut participer : ok ? (inconvénient : il apparaît dans la progression des joueurs)
 
 ## Présentation
 Chasse au trésor **Le secret de la Pierre d'Azur**, accessible depuis l'URL [http://pierre-azur.sc2dero1876.universe.wf/](http://pierre-azur.sc2dero1876.universe.wf/).
