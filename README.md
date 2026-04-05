@@ -1,8 +1,5 @@
 # Le secret de la pierre d'azur
 
-> [!NOTE]
-> Prochaine étape : AJOUTER LE NB DE TENTATIVE POUR L'ADMIN + Présenter, valider et ajuster avant le déploiement wsgi vers o2switch. Actuellement, l'admin peut participer : ok ? (inconvénient : il apparaît dans la progression des joueurs)
-
 ## Présentation
 Chasse au trésor **Le secret de la Pierre d'Azur**, accessible depuis l'URL [http://pierre-azur.sc2dero1876.universe.wf/](http://pierre-azur.sc2dero1876.universe.wf/).
 
@@ -137,3 +134,12 @@ le-secret-de-la-pierre-d-azur/
                   (attend manche suivante
                    ou fin de la chasse)
 ```
+
+## A faire
+- Ajouter vidéo d'introduction du jeu (model Config)
+- AJOUTER LE NB DE TENTATIVE POUR L'ADMIN
+- Ajout bouton Refresh
+- Ajouter la possibilité de supprimer des joueurs (à côté de réinitialiser)
+- Un compte administrateur ne peut pas être joueur
+- Ajouter l'attribut 'indice' dans enigme + l'administrateur peut l'afficher/activer et le rendre visible dans enigme (per user) [clic depuis la progression des joueurs?]
+- Texte : NOM DU CHASSEUR -> NOM DE L'EQUIPE

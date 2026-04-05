@@ -12,9 +12,7 @@
     </div>
 
     {% if enigme.video_url %}
-    <video class="enigme-video" controls playsinline preload="metadata">
-        <source src="{{ enigme.video_url }}">
-    </video>
+    <iframe width="450" height="315" src="{{ enigme.video_url }}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
     {% endif %}
 
     <p class="instruction-text">{{ enigme.instruction }}</p>
