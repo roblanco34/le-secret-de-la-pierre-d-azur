@@ -39,6 +39,7 @@
         </div>
     </div>
 
+
     <!-- ── Progression globale ── -->
     <div class="admin-section">
         <h2>Progression globale</h2>
@@ -55,6 +56,7 @@
                 <tbody>
                     {% for manche in [1, 2, 3] %}
                         {% for enigme in range(1, 6) %}
+                        {% set row_id = "row-" ~ manche ~ "-" ~ enigme %}
                         <tr>
                             <td style="color:var(--texte-muted);">
                                 M{{ manche }}·E{{ enigme }}
@@ -62,6 +64,7 @@
                             {% for item in vue %}
                                 {% set p = item.progression.get(manche, {}).get(enigme) %}
                                 {% set e_obj = item.progression_enigmes.get(manche, {}).get(enigme) %}
+                                {% set attempts = item.progression_attempts.get(manche, {}).get(enigme, []) %}
                                 <td>
                                     {% if p %}
                                     <form method="POST"
@@ -76,14 +79,47 @@
                                             {% endif %}
                                         </button>
                                     </form>
+                                    {% if attempts %}
+                                    <button class="btn-attempts"
+                                            onclick="toggleAttempts('{{ row_id }}-{{ item.user.id }}')">
+                                        {{ attempts|length }}×
+                                    </button>
+                                    {% endif %}
                                     {% else %}
                                         <span class="td-empty">—</span>
                                     {% endif %}
                                 </td>
                             {% endfor %}
                         </tr>
+
+                        <!-- Ligne dépliable des tentatives -->
+                        {% for item in vue %}
+                            {% set attempts = item.progression_attempts.get(manche, {}).get(enigme, []) %}
+                            {% if attempts %}
+                            <tr class="attempts-row"
+                                id="{{ row_id }}-{{ item.user.id }}"
+                                style="display:none;">
+                                <td colspan="{{ vue|length + 1 }}" class="attempts-cell">
+                                    <div class="attempts-header">
+                                        {{ item.user.name }} — M{{ manche }}·E{{ enigme }}
+                                    </div>
+                                    <ul class="attempts-list">
+                                        {% for a in attempts %}
+                                        <li class="attempt-item {% if loop.last and item.progression.get(manche, {}).get(enigme) and item.progression.get(manche, {}).get(enigme).is_solved %}attempt-correct{% endif %}">
+                                            <span class="attempt-valeur">{{ a.valeur }}</span>
+                                            <span class="attempt-date">{{ a.date.strftime('%H:%M:%S') }}</span>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+
                         {% endfor %}
                     {% endfor %}
+
+                    <!-- Ligne total -->
                     <tr style="border-top: 1px solid var(--bordure);">
                         <td style="font-family:'Cinzel',serif; font-size:0.75rem; color:var(--or);">
                             Total
@@ -97,7 +133,6 @@
                 </tbody>
             </table>
         </div>
-
         <!-- Réinitialisations -->
         <div class="carte mt-2">
             <h2 style="font-size:0.75rem; margin-bottom:0.75rem;">Réinitialiser un joueur</h2>
@@ -140,4 +175,11 @@
         </div>
     </div>
 </div>
+<script>
+function toggleAttempts(rowId) {
+    const row = document.getElementById(rowId);
+    if (!row) return;
+    row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+}
+</script>
 {% endblock %}

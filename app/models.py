@@ -60,6 +60,8 @@ class Progress(db.Model):
     # Relations inverses
     user   = db.relationship("User", back_populates="progresses")
     enigme = db.relationship("Enigme", back_populates="progresses")
+    attempts = db.relationship("Attempt", back_populates="progress",
+                               order_by="Attempt.date", lazy="dynamic")
 
     # Contrainte : un seul Progress par (user, enigme)
     __table_args__ = (
@@ -100,3 +102,13 @@ class Config(db.Model):
             entry = Config(key=key, value=str(value))
             db.session.add(entry)
         db.session.commit()
+
+class Attempt(db.Model):
+    __tablename__ = "attempts"
+
+    id          = db.Column(db.Integer, primary_key=True)
+    progress_id = db.Column(db.Integer, db.ForeignKey("progress.id"), nullable=False)
+    valeur      = db.Column(db.String(255), nullable=False)  # réponse brute du joueur
+    date        = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    progress = db.relationship("Progress", back_populates="attempts")

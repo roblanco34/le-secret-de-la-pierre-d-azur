@@ -656,3 +656,69 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
     border: 1px solid var(--bordure-or);
     color: var(--or-light) !important;
 }
+
+/* ── Tentatives ──────────────────────────────────────────────────────────────── */
+.btn-attempts {
+    background: transparent;
+    border: 1px solid var(--bordure);
+    border-radius: 4px;
+    color: var(--texte-muted);
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    padding: 0.1rem 0.35rem;
+    cursor: pointer;
+    margin-left: 0.3rem;
+    vertical-align: middle;
+}
+
+.btn-attempts:hover {
+    border-color: var(--azur-dark);
+    color: var(--azur);
+}
+
+.attempts-row td {
+    background: rgba(255,255,255,0.02);
+    border-bottom: 1px solid var(--bordure);
+}
+
+.attempts-cell {
+    padding: 0.75rem 1rem !important;
+}
+
+.attempts-header {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    color: var(--texte-muted);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+.attempts-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.attempt-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.3rem 0;
+    border-bottom: 1px solid rgba(30, 51, 72, 0.4);
+    font-family: 'Crimson Text', serif;
+    font-size: 0.95rem;
+}
+
+.attempt-item:last-child { border-bottom: none; }
+
+.attempt-valeur { color: var(--texte); }
+
+.attempt-date {
+    color: var(--texte-muted);
+    font-size: 0.8rem;
+}
+
+.attempt-correct .attempt-valeur {
+    color: #6EC99A;
+}
