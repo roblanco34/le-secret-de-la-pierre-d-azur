@@ -13,6 +13,10 @@ class DevelopmentConfig(Config):
 
 class ProductionConfig(Config):
     DEBUG = False
+    # SQLite chemin absolu — important sur serveur
+    SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "instance", "database.db"
+    )
 
 config = {
     "development": DevelopmentConfig,
