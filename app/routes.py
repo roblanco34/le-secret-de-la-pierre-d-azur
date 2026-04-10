@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash
+from flask import Blueprint, render_template, redirect, url_for, request, flash, abort
 from flask_login import login_user, logout_user, login_required, current_user
 
 from .extensions import admin_required, player_required
@@ -173,6 +173,8 @@ def supprimer_joueur_route(user_id):
     if user.is_admin:
         flash("Impossible de supprimer un administrateur.", "danger")
         return redirect(url_for("admin.index"))
+    
+    nom = user.name          # 👈 sauvegarde avant suppression
     supprimer_joueur(user_id)
-    flash(f"Joueur '{user.name}' supprimé.", "danger")
+    flash(f"Joueur '{nom}' supprimé.", "danger")   # 👈 utilise la variable
     return redirect(url_for("admin.index"))
