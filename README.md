@@ -15,9 +15,9 @@ le-secret-de-la-pierre-d-azur/
 │
 ├── app/
 │   ├── __init__.py          # create_app() — Application Factory
-│   ├── extensions.py        # db, migrate, login_manager, admin_required
-│   ├── models.py            # User, Enigme, Progress, Config
-│   ├── routes.py            # auth_bp, game_bp, admin_bp
+│   ├── extensions.py        # db, migrate, login_manager, admin_required, ...
+│   ├── models.py            # User, Enigme, Progress, Config, Attempt
+│   ├── routes.py            # auth_bp, game_bp, admin_bp, ...
 │   ├── services.py          # logique métier (auth, jeu, admin)
 │   ├── static/
 │   │   └── style.css
@@ -39,6 +39,7 @@ le-secret-de-la-pierre-d-azur/
 ```
 
 ### Les modèles
+*Ajouter Attempt*
 
 ```
 ┌─────────────────────┐        ┌──────────────────────────┐
@@ -75,7 +76,7 @@ le-secret-de-la-pierre-d-azur/
 │       Config        │  ← table clé/valeur
 ├─────────────────────┤
 │ key         String  │  ex: "manches_debloquees" → "1,2"
-│ value       String  │
+│ value       String  │      "intro_video_url"
 └─────────────────────┘
 ```
 
@@ -143,4 +144,4 @@ le-secret-de-la-pierre-d-azur/
 - ~~Un compte administrateur ne peut pas être joueur~~
 - ~~Ajouter l'attribut 'indice' dans enigme + l'administrateur peut l'afficher/activer et le rendre visible dans enigme (per user) [clic depuis la progression des joueurs?]~~
 - ~~Texte : NOM DU CHASSEUR -> NOM DE L'EQUIPE~~
-- Admin : voir les tentatives
+- ~~Admin : voir les tentatives~~
