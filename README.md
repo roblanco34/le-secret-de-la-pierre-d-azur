@@ -1,24 +1,60 @@
-# Le secret de la pierre d'azur
+# Le Secret de la Pierre d'Azur
+
+> Chasse au trésor en ligne — Bretagne (35)
+
+![Python](https://img.shields.io/badge/Python-3.12-blue)
+![Flask](https://img.shields.io/badge/Flask-3.x-lightgrey)
+![SQLite](https://img.shields.io/badge/SQLite-3-003B57)
+![Licence](https://img.shields.io/badge/Licence-CC%20BY--NC--ND%204.0-green)
+
+---
 
 ## Présentation
-Chasse au trésor **Le secret de la Pierre d'Azur**, accessible depuis l'URL [http://pierre-azur.sc2dero1876.universe.wf/](http://pierre-azur.sc2dero1876.universe.wf/).
 
-Cette application possède 2 profils :
-- `player` : permet de participer aux manches et énigmes, et d'envoyer des réponses.
-- `admin` : permet de créer ou réinitialiser des utilisateurs, voir l'avancement des players et débloquer les manches.
+Application web de chasse au trésor jouée en équipe, optimisée pour smartphone.  
+Une seule chasse organisée entre amis, composée de **3 manches de 5 énigmes** chacune.
 
-## Documentation
-### Architecture du projet
+Les manches sont débloquées manuellement par un administrateur. Au sein d'une manche
+débloquée, chaque joueur progresse à son rythme dans l'ordre des énigmes.
+
+---
+
+## Fonctionnalités
+
+- Authentification par nom / mot de passe
+- Progression individuelle par énigme (tentatives illimitées)
+- Vidéo + instruction par énigme
+- Indices activables par l'admin pour un joueur donné
+- Tableau de bord admin en temps réel (progression, tentatives, indices)
+- Gestion des joueurs (création, réinitialisation, suppression)
+- Déblocage des manches à la main
+
+---
+
+## Stack technique
+
+| Composant | Technologie |
+|---|---|
+| Framework | Flask 3.x |
+| ORM | Flask-SQLAlchemy |
+| Base de données | SQLite |
+| Migrations | Flask-Migrate (Alembic) |
+| Authentification | Flask-Login |
+| Serveur de prod | Passenger (o2switch) |
+| Front | Jinja2 + CSS custom (mobile-first) |
+
+---
+
+## Architecture
 
 ```
 le-secret-de-la-pierre-d-azur/
-│
 ├── app/
-│   ├── __init__.py          # create_app() — Application Factory
-│   ├── extensions.py        # db, migrate, login_manager, admin_required, ...
-│   ├── models.py            # User, Enigme, Progress, Config, Attempt
-│   ├── routes.py            # auth_bp, game_bp, admin_bp, ...
-│   ├── services.py          # logique métier (auth, jeu, admin)
+│   ├── __init__.py          # create_app() — Application 
+│   ├── extensions.py        # db, migrate, login_manager, admin_required
+│   ├── models.py            # User, Enigme, Progress, Attempt, Config
+│   ├── routes.py            # auth_bp, game_bp, admin_bp
+│   ├── services.py          # logique métier
 │   ├── static/
 │   │   └── style.css
 │   └── templates/
@@ -27,121 +63,124 @@ le-secret-de-la-pierre-d-azur/
 │       ├── index.html
 │       ├── enigme.html
 │       └── admin.html
-│
-├── migrations/              # versionning schéma (Flask-Migrate)
+├── migrations/
 ├── instance/
-│   └── database.db          # SQLite (jamais commité)
-├── passenger_wsgi.py        # point d'entrée production (o2switch)
-├── config.py                # DevelopmentConfig / ProductionConfig
+│   └── database.db          # jamais commité
+├── enigmes.json             # contenu des énigmes
+├── passenger_wsgi.py        # point d'entrée production
+├── config.py
 ├── requirements.txt
-├── .env                     # secrets (jamais commité)
+├── .env                     # jamais commité
 └── run.py                   # point d'entrée développement
 ```
 
-### Les modèles
-*Ajouter Attempt*
+---
 
-```
-┌─────────────────────┐        ┌──────────────────────────┐
-│        User         │        │          Enigme           │
-├─────────────────────┤        ├──────────────────────────┤
-│ id          Integer │        │ id          Integer       │
-│ name        String  │        │ manche      Integer 1-3  │
-│ password    String  │        │ enigme      Integer 1-5  │
-│ role        String  │        │ name        String       │
-│                     │        │ instruction Text         │
-│ is_admin  @property │        │ video_url   String       │
-└──────────┬──────────┘        │ response    String (norm)│
-           │                   └────────────┬─────────────┘
-           │ 1                              │ 1
-           │                               │
-           └──────────────┬────────────────┘
-                          │ N
-               ┌──────────┴──────────┐
-               │       Progress      │
-               ├─────────────────────┤
-               │ id          Integer │
-               │ user_id     FK      │
-               │ enigme_id   FK      │
-               │ attempt     Integer │
-               │ start       DateTime│
-               │ end         DateTime│  ← null si non résolue
-               │ time        Integer │  ← secondes (end-start)
-               │                    │
-               │ is_solved @property│
-               │ solve()   @method  │
-               └────────────────────┘
+## Installation locale
 
-┌─────────────────────┐
-│       Config        │  ← table clé/valeur
-├─────────────────────┤
-│ key         String  │  ex: "manches_debloquees" → "1,2"
-│ value       String  │      "intro_video_url"
-└─────────────────────┘
-```
+### Prérequis
 
-### Flux de jeu
+- Python 3.12+
+- pip
 
-```
-[ Admin ]
-                            │
-                    débloque manche N
-                            │
-                            ▼
-[ Joueur ] ──── /login ──► /index
-                            │
-                  ┌─────────┴──────────┐
-                  │  Carte de la quête │
-                  │  Manche 1          │
-                  │  ✓ Énigme 1        │  ← résolue
-                  │  › Énigme 2        │  ← accessible
-                  │  ✕ Énigme 3        │  ← verrouillée
-                  │  Manche 2  🔒      │  ← non débloquée
-                  └─────────┬──────────┘
-                            │ clique "Commencer / Continuer"
-                            ▼
-                      /enigme/<id>
-                            │
-                   Progress existant ?
-                      │           │
-                     Non         Oui
-                      │           │
-               start = now()     (on reprend)
-                      └─────┬─────┘
-                            │
-                    affiche vidéo
-                    + instruction
-                    + input réponse
-                            │
-                        soumet
-                            │
-                   attempt += 1
-                   normalize(réponse)
-                            │
-                  ┌─────────┴──────────┐
-                 Bonne              Mauvaise
-                réponse             réponse
-                  │                     │
-          end = now()            flash "Mauvaise réponse"
-          time = end - start     retour formulaire
-                  │
-          toutes les énigmes
-          de la manche résolues ?
-                  │
-         ┌────────┴────────┐
-        Non               Oui
-         │                 │
-      /index            /index
-                  (attend manche suivante
-                   ou fin de la chasse)
+### Étapes
+
+```bash
+# 1. Cloner le repo
+git clone https://github.com/toi/le-secret-de-la-pierre-d-azur.git
+cd le-secret-de-la-pierre-d-azur
+
+# 2. Créer et activer le virtualenv
+python -m venv .venv
+.venv\Scripts\activate      # Windows
+source .venv/bin/activate   # Mac/Linux
+
+# 3. Installer les dépendances
+pip install -r requirements.txt
+
+# 4. Créer le fichier .env
+echo "SECRET_KEY=change_moi\nFLASK_ENV=development" > .env
+
+# 5. Initialiser la base de données
+flask db upgrade
+
+# 6. Créer un compte admin
+flask shell
+>>> from app.extensions import db
+>>> from app.models import User
+>>> from app.services import hash_password
+>>> admin = User(name="admin", password=hash_password("ton_mdp"), role="admin")
+>>> db.session.add(admin)
+>>> db.session.commit()
+
+# 8. Lancer le serveur
+python run.py
 ```
 
-## A faire
-- ~~Ajouter vidéo d'introduction du jeu (model Config)~~
-- ~~AJOUTER LE NB DE TENTATIVE POUR L'ADMIN~~
-- ~~Ajout bouton Refresh~~
-- ~~Ajouter la possibilité de supprimer des joueurs (à côté de réinitialiser)~~
-- ~~Un compte administrateur ne peut pas être joueur~~
-- ~~Ajouter l'attribut 'indice' dans enigme + l'administrateur peut l'afficher/activer et le rendre visible dans enigme (per user) [clic depuis la progression des joueurs?]~~
-- ~~Texte : NOM DU CHASSEUR -> NOM DE L'EQUIPE~~
-- ~~Admin : voir les tentatives~~
+L'application est accessible sur `http://127.0.0.1:5000`.
+
+---
+
+## Gestion des énigmes
+
+Les énigmes sont gérés directement depuis la table `enigmes` de la base de données.
+
+Pour le moment, il est nécessaire de récupérer la `database.db` générée afin de mettre à jour les énigmes et de la remplacer.
+
+---
+
+## Déploiement sur o2switch
+
+```bash
+# 1. Cloner le repo sur le serveur
+cd /home/user
+git clone https://github.com/toi/le-secret-de-la-pierre-d-azur.git
+
+# 2. Créer le .env
+nano le-secret-de-la-pierre-d-azur/.env
+
+# 3. Activer le virtualenv (commande fournie par cPanel Setup Python App)
+source /home/user/virtualenv/le-secret-de-la-pierre-d-azur/3.12/bin/activate
+
+# 4. Installer les dépendances
+pip install -r requirements.txt
+
+# 5. Initialiser la DB
+flask db upgrade
+
+# 6. Redémarrer depuis cPanel Setup Python App → Restart
+```
+
+Pour mettre à jour après un push :
+
+```bash
+cd /home/user/le-secret-de-la-pierre-d-azur
+git pull
+# Puis Restart depuis cPanel
+```
+
+---
+
+## Variables d'environnement
+
+| Variable | Description | Exemple |
+|---|---|---|
+| `SECRET_KEY` | Clé de chiffrement des sessions | `token_hex(32)` |
+| `FLASK_ENV` | Environnement (`development` / `production`) | `production` |
+
+---
+
+## Fichiers à ne jamais commiter
+
+```
+.env
+instance/database.db
+passenger_wsgi.py   # spécifique au serveur
+```
+
+---
+
+## Licence
+
+Ce projet est publié sous licence **Creative Commons BY-NC-ND 4.0**.  
+Voir le fichier [LICENSE](LICENSE) pour les détails.
