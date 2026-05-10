@@ -664,10 +664,13 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
     border-radius: 4px;
     color: var(--texte-muted);
     font-family: 'Cinzel', serif;
-    font-size: 0.65rem;
-    padding: 0.1rem 0.35rem;
+    font-size: 1rem;
+    /* font-size: 0.65rem; */
+    padding: 0.4rem 0.9rem;
+    /* padding: 0.1rem 0.35rem; */
     cursor: pointer;
     margin-left: 0.3rem;
+    margin-top: 0.5rem;
     vertical-align: middle;
 }
 
