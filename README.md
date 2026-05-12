@@ -28,6 +28,7 @@ débloquée, chaque joueur progresse à son rythme dans l'ordre des énigmes.
 - Tableau de bord admin en temps réel (progression, tentatives, indices)
 - Gestion des joueurs (création, réinitialisation, suppression)
 - Déblocage des manches à la main
+- Les réponses sont à saisir en base au format `reponse1|reponse-1|reponse 1` afin de fonctionner avec des orthographes différents
 
 ---
 
@@ -126,6 +127,9 @@ L'application est accessible sur `http://127.0.0.1:5000`.
 Les énigmes sont gérés directement depuis la table `enigmes` de la base de données.
 
 Pour le moment, il est nécessaire de récupérer la `database.db` générée afin de mettre à jour les énigmes et de la remplacer.
+
+> [!TIP]
+> En laissant une `database_init.db` vide dans `/home/user/le-secret-de-la-pierre-d-azur/instance`, le redémarrage est rendu plus facile.
 
 ---
 

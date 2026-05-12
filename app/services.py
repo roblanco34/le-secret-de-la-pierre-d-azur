@@ -159,11 +159,6 @@ def get_progression_user(user):
 # ── Vérification de réponse ────────────────────────────────────────────────────
 
 def verifier_reponse(user, enigme, reponse_user):
-    """
-    Incrémente attempt, enregistre la tentative brute,
-    compare la réponse normalisée.
-    Retourne (progress, is_correct).
-    """
     progress = get_or_create_progress(user, enigme)
     progress.attempt += 1
 
@@ -173,7 +168,9 @@ def verifier_reponse(user, enigme, reponse_user):
     )
     db.session.add(attempt)
 
-    is_correct = normalize(reponse_user) == enigme.response
+    # Compare avec chaque variante
+    variantes = [v.strip() for v in enigme.response.split("|")]
+    is_correct = normalize(reponse_user) in variantes
 
     if is_correct and not progress.is_solved:
         progress.solve()
