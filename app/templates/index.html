@@ -75,6 +75,14 @@
         </div>
         {% endfor %}
 
+        <div class="enigme-action">
+            {% if data.debloquee and (data.enigmes | selectattr('progress') | selectattr('progress.is_solved') | list | length) == data.enigmes|length %}
+                <a href="{{ url_for('game.fin_manche', manche_id=manche) }}" class="btn btn-or">
+                    Revoir la vidéo de fin
+                </a>
+            {% endif %}
+        </div>
+
     </div>
     {% endfor %}
 

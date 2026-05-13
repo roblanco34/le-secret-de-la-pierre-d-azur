@@ -21,29 +21,41 @@ class User(UserMixin, db.Model):
         return self.role == "admin"
 
 
+class Manche(db.Model):
+    __tablename__ = "manches"
+
+    id        = db.Column(db.Integer, primary_key=True)  # 1, 2 ou 3
+    name      = db.Column(db.String(120), nullable=False)
+    video_fin = db.Column(db.String(255), nullable=True)
+
+    enigmes   = db.relationship("Enigme", back_populates="manche_rel",
+                                order_by="Enigme.enigme")
+
+    def __repr__(self):
+        return f"<Manche {self.id}>"
+
+
 class Enigme(db.Model):
     __tablename__ = "enigmes"
 
-    id          = db.Column(db.Integer, primary_key=True)  # ordre global 1→15
-    manche      = db.Column(db.Integer, nullable=False)    # 1, 2 ou 3
-    enigme      = db.Column(db.Integer, nullable=False)    # 1→5 dans la manche
+    id          = db.Column(db.Integer, primary_key=True)
+    manche      = db.Column(db.Integer, db.ForeignKey("manches.id"), nullable=False)
+    enigme      = db.Column(db.Integer, nullable=False)
     name        = db.Column(db.String(120), nullable=False)
     instruction = db.Column(db.Text, nullable=False)
     video_url   = db.Column(db.String(255), nullable=True)
-    response    = db.Column(db.String(255), nullable=False)  # stockée normalisée
     indice      = db.Column(db.Text, nullable=True)
+    response    = db.Column(db.String(255), nullable=False)
 
-    # Relation : une énigme a plusieurs Progress
-    progresses = db.relationship("Progress", back_populates="enigme", lazy="dynamic")
+    manche_rel  = db.relationship("Manche", back_populates="enigmes")
+    progresses  = db.relationship("Progress", back_populates="enigme", lazy="dynamic")
 
-    # Contrainte : combinaison manche+enigme unique
     __table_args__ = (
         db.UniqueConstraint("manche", "enigme", name="uq_manche_enigme"),
     )
 
     def __repr__(self):
         return f"<Enigme M{self.manche}-E{self.enigme} — {self.name}>"
-
 
 class Progress(db.Model):
     __tablename__ = "progress"

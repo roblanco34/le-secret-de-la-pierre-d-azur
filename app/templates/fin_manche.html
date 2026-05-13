@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Manche {{ manche.id }} terminée — La Pierre d'Azur{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <div class="enigme-header">
+        <div class="enigme-badge">Manche {{ manche.id }} — Terminée</div>
+        <h1>Bien joué !</h1>
+    </div>
+
+    {% if manche.video_fin %}
+    <div class="video-wrapper">
+        <iframe src="{{ manche.video_fin }}"
+                title="Fin de la manche {{ manche.id }}"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen>
+        </iframe>
+    </div>
+    {% endif %}
+
+    <div class="carte carte-or text-center">
+        <p style="font-style:italic; font-size:1.1rem; margin-bottom:1.25rem;">
+            {% if manche.id < 3 %}
+                La prochaine manche sera bientôt déverrouillée…
+            {% else %}
+                Tu as terminé la chasse au trésor !
+            {% endif %}
+        </p>
+        <a href="{{ url_for('game.index') }}" class="btn btn-or">
+            Retour à la carte
+        </a>
+    </div>
+
+</div>
+{% endblock %}

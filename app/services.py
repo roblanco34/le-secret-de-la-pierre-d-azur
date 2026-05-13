@@ -155,6 +155,23 @@ def get_progression_user(user):
 
     return result
 
+def is_manche_terminee(user, manche_id):
+    """Retourne True si toutes les énigmes de la manche sont résolues."""
+    enigmes = get_enigmes_par_manche(manche_id)
+    if not enigmes:
+        return False
+    for enigme in enigmes:
+        progress = Progress.query.filter_by(
+            user_id=user.id,
+            enigme_id=enigme.id
+        ).first()
+        if not progress or not progress.is_solved:
+            return False
+    return True
+
+def get_manche(manche_id):
+    from .models import Manche
+    return Manche.query.get_or_404(manche_id)
 
 # ── Vérification de réponse ────────────────────────────────────────────────────
 

@@ -14,7 +14,8 @@ from .services import (
     get_vue_globale, get_tous_les_joueurs,
     creer_joueur, reinitialiser_progression,
     get_manches_debloquees, set_manches_debloquees,
-    get_intro_video_url, toggler_indice, supprimer_joueur
+    get_intro_video_url, toggler_indice, supprimer_joueur,
+    is_manche_terminee, get_manche
 )
 
 
@@ -65,6 +66,16 @@ def index():
     intro_video_url = get_intro_video_url()
     return render_template("index.html", progression=progression, intro_video_url=intro_video_url)
 
+@game_bp.route("/manche/<int:manche_id>/fin")
+@login_required
+@player_required
+def fin_manche(manche_id):
+    # Vérifie que la manche est bien terminée
+    if not is_manche_terminee(current_user, manche_id):
+        return redirect(url_for("game.index"))
+
+    manche = get_manche(manche_id)
+    return render_template("fin_manche.html", manche=manche)
 
 @game_bp.route("/enigme/<int:enigme_id>", methods=["GET", "POST"])
 @login_required
@@ -88,11 +99,20 @@ def enigme(enigme_id):
         reponse_user = request.form.get("reponse", "")
         progress, is_correct = verifier_reponse(current_user, e, reponse_user)
 
+        # if is_correct:
+        #     flash(f"Bonne réponse ! Résolue en {progress.time/60:.0f}min.", "success")
+        #     return redirect(url_for("game.index"))
+        # else:
+        #     flash(f"Mauvaise réponse. Tentative n°{progress.attempt}.", "danger")
+
         if is_correct:
             flash(f"Bonne réponse ! Résolue en {progress.time/60:.0f}min.", "success")
+
+            # Vérifie si c'était la dernière énigme de la manche   👈
+            if is_manche_terminee(current_user, e.manche):
+                return redirect(url_for("game.fin_manche", manche_id=e.manche))
+
             return redirect(url_for("game.index"))
-        else:
-            flash(f"Mauvaise réponse. Tentative n°{progress.attempt}.", "danger")
 
     return render_template("enigme.html", enigme=e, progress=progress)
 
