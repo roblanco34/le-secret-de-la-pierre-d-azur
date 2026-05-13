@@ -53,7 +53,7 @@ le-secret-de-la-pierre-d-azur/
 ├── app/
 │   ├── __init__.py          # create_app() — Application 
 │   ├── extensions.py        # db, migrate, login_manager, admin_required
-│   ├── models.py            # User, Enigme, Progress, Attempt, Config
+│   ├── models.py            # User, Enigme, Progress, Attempt, Config, Manches
 │   ├── routes.py            # auth_bp, game_bp, admin_bp
 │   ├── services.py          # logique métier
 │   ├── static/
@@ -67,7 +67,6 @@ le-secret-de-la-pierre-d-azur/
 ├── migrations/
 ├── instance/
 │   └── database.db          # jamais commité
-├── enigmes.json             # contenu des énigmes
 ├── passenger_wsgi.py        # point d'entrée production
 ├── config.py
 ├── requirements.txt
