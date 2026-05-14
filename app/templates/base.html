@@ -39,5 +39,35 @@
 
 {% block content %}{% endblock %}
 
+<script>
+{% if current_user.is_authenticated and not current_user.is_admin %}
+let etatInitial = null;
+let pollingActif = true;
+
+document.querySelectorAll('input').forEach(input => {
+    input.addEventListener('focus', () => pollingActif = false);
+    input.addEventListener('blur',  () => pollingActif = true);
+});
+
+// Capture l'état au chargement de la page
+fetch("/statut")
+    .then(r => r.json())
+    .then(data => { etatInitial = JSON.stringify(data); });
+
+// Vérifie toutes les 15s
+setInterval(() => {
+    if (!pollingActif || !etatInitial) return;
+    fetch("/statut")
+        .then(r => r.json())
+        .then(data => {
+            if (JSON.stringify(data) !== etatInitial) {
+                location.reload();
+            }
+        })
+        .catch(() => {});
+}, 15000);
+{% endif %}
+</script>
+
 </body>
 </html>

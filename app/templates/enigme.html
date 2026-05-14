@@ -31,7 +31,7 @@
     <div class="enigme-resolue carte carte-or">
         <div class="icone">✦</div>
         <h2 class="text-or">Énigme résolue !</h2>
-        <p class="temps">{{ progress.time }} secondes</p>
+        <p class="temps">{{ progress.time | minutes }}</p>
         <p class="text-muted" style="font-size:0.9rem;">
             {{ progress.attempt }} tentative(s)
         </p>

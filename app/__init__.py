@@ -46,3 +46,22 @@ def create_app(config_name=None):
 
     return app
 
+    @app.context_processor
+    def inject_user_state():
+        """Injecte l'état du joueur dans tous les templates."""
+        from flask_login import current_user
+        from .models import Progress
+        from .services import get_manches_debloquees
+
+        if not current_user.is_authenticated or current_user.is_admin:
+            return {"current_user_state": None}
+
+        progresses = Progress.query.filter_by(user_id=current_user.id).all()
+        return {
+            "current_user_state": {
+                "enigmes_resolues": [p.enigme_id for p in progresses if p.is_solved],
+                "indices_actifs":   [p.enigme_id for p in progresses if p.indice_active],
+                "manches":          get_manches_debloquees()
+            }
+        }
+

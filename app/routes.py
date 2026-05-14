@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash, abort
+from flask import Blueprint, render_template, redirect, url_for, request, flash, abort, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 
 from .extensions import admin_required, player_required
@@ -65,6 +65,20 @@ def index():
     progression = get_progression_user(current_user)
     intro_video_url = get_intro_video_url()
     return render_template("index.html", progression=progression, intro_video_url=intro_video_url)
+
+
+@game_bp.route("/statut")
+@login_required
+@player_required
+def statut():
+    """Retourne l'état actuel du joueur en JSON — utilisé pour le polling."""
+    from .models import Progress
+    progresses = Progress.query.filter_by(user_id=current_user.id).all()
+    return jsonify({
+        "enigmes_resolues": [p.enigme_id for p in progresses if p.is_solved],
+        "indices_actifs":   [p.enigme_id for p in progresses if p.indice_active],
+        "manches":          get_manches_debloquees()
+    })
 
 @game_bp.route("/manche/<int:manche_id>/fin")
 @login_required
