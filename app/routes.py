@@ -41,7 +41,7 @@ def login():
         user     = get_user_by_name(name)
 
         if user and verify_password(user, password):
-            login_user(user)
+            login_user(user, remember=True)
             if user.is_admin:
                 return redirect(url_for("admin.index"))
             return redirect(url_for("game.index"))
