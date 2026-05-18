@@ -41,7 +41,7 @@
                 {% if p and p.is_solved %}status-solved
                 {% elif item.accessible %}status-active
                 {% else %}status-locked{% endif %}">
-                {% if p and p.is_solved %}✓
+                {% if p and p.is_solved %}<a href="{{ url_for('game.enigme', enigme_id=e.id) }}">✓</a>
                 {% elif item.accessible %}›
                 {% else %}✕{% endif %}
             </div>

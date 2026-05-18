@@ -30,7 +30,7 @@
 
     <div class="enigme-resolue carte carte-or">
         <div class="icone">✦</div>
-        <h2 class="text-or">Énigme résolue !</h2>
+        <h2 class="text-or">{{ enigme.response.split('|')[0].upper() }}</h2>
         <p class="temps">{{ progress.time | minutes }}</p>
         <p class="text-muted" style="font-size:0.9rem;">
             {{ progress.attempt }} tentative(s)
@@ -57,6 +57,10 @@
     {% if progress.attempt > 0 %}
     <p class="tentatives mt-2">
         Tentative(s) : {{ progress.attempt }}
+        {% for tentative in progress.attempts %}
+            <br>
+            ❌ {{ tentative.valeur }}
+        {% endfor %}
     </p>
     {% endif %}
 
