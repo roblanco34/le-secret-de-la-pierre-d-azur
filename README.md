@@ -187,3 +187,10 @@ passenger_wsgi.py   # spécifique au serveur
 
 Ce projet est publié sous licence **Creative Commons BY-NC-ND 4.0**.  
 Voir le fichier [LICENSE](LICENSE) pour les détails.
+
+## Mémo
+- Ajouter la localisation des enigmes qui rend possible la réponse
+- Mettre au propre le nouveau model `Manche` : à certains endroits il reste `[1, 2, 3]`
+- Augmentation du cookie de session (1 jour)
+- Modifier la route `/statut` en une api réutilisable (polling)
+- Quête sélectionnable (model: quete) avec un `style.css` par quête

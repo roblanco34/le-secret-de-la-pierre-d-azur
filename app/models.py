@@ -20,16 +20,28 @@ class User(UserMixin, db.Model):
     def is_admin(self):
         return self.role == "admin"
 
+# class Quete(db.Model):
+#     __tablename__ = "quetes"
+
+#     id          = db.Column(db.Integer, primary_key=True)
+#     name        = db.Column(db.String(120), nullable=False)
+#     description = db.Column(db.Text, nullable=False)
+
+#     def __repr__(self):
+#         return f"<{self.name}>"
+    
 
 class Manche(db.Model):
     __tablename__ = "manches"
 
-    id        = db.Column(db.Integer, primary_key=True)  # 1, 2 ou 3
+    id        = db.Column(db.Integer, primary_key=True)
     name      = db.Column(db.String(120), nullable=False)
     video_fin = db.Column(db.String(255), nullable=True)
+    # quete     = db.Column(db.Integer, db.ForeignKey("quetes.id"), nullable=False)
 
     enigmes   = db.relationship("Enigme", back_populates="manche_rel",
                                 order_by="Enigme.enigme")
+    # quete_rel = db.relationship("Quete", back_populates="manches")
 
     def __repr__(self):
         return f"<Manche {self.id}>"

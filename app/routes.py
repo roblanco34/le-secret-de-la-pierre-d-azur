@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, request, flash,
 from flask_login import login_user, logout_user, login_required, current_user
 
 from .extensions import admin_required, player_required
-from .models import Enigme, User
+from .models import Enigme, User, Progress
 from .services import (
     get_user_by_name,
     verify_password,
@@ -66,13 +66,12 @@ def index():
     intro_video_url = get_intro_video_url()
     return render_template("index.html", progression=progression, intro_video_url=intro_video_url)
 
-
+# ── Endpoint pour le polling du statut du joueur ─────────────────────────────────────
 @game_bp.route("/statut")
 @login_required
 @player_required
 def statut():
     """Retourne l'état actuel du joueur en JSON — utilisé pour le polling."""
-    from .models import Progress
     progresses = Progress.query.filter_by(user_id=current_user.id).all()
     return jsonify({
         "enigmes_resolues": [p.enigme_id for p in progresses if p.is_solved],
@@ -80,6 +79,7 @@ def statut():
         "manches":          get_manches_debloquees()
     })
 
+# ── Fin de manche ───────────────────────────────────────────────────────────────────────
 @game_bp.route("/manche/<int:manche_id>/fin")
 @login_required
 @player_required
@@ -91,6 +91,8 @@ def fin_manche(manche_id):
     manche = get_manche(manche_id)
     return render_template("fin_manche.html", manche=manche)
 
+
+# ── Enigme ────────────────────────────────────────────────────────────────────
 @game_bp.route("/enigme/<int:enigme_id>", methods=["GET", "POST"])
 @login_required
 @player_required 
@@ -112,12 +114,6 @@ def enigme(enigme_id):
     if request.method == "POST":
         reponse_user = request.form.get("reponse", "")
         progress, is_correct = verifier_reponse(current_user, e, reponse_user)
-
-        # if is_correct:
-        #     flash(f"Bonne réponse ! Résolue en {progress.time/60:.0f}min.", "success")
-        #     return redirect(url_for("game.index"))
-        # else:
-        #     flash(f"Mauvaise réponse. Tentative n°{progress.attempt}.", "danger")
 
         if is_correct:
             flash(f"Bonne réponse ! Résolue en {progress.time/60:.0f}min.", "success")
