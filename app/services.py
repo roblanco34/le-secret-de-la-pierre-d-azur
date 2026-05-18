@@ -177,19 +177,17 @@ def get_manche(manche_id):
 
 def verifier_reponse(user, enigme, reponse_user):
     progress = get_or_create_progress(user, enigme)
-    progress.attempt += 1
 
-    attempt = Attempt(
-        progress_id=progress.id,
-        valeur=reponse_user.strip()
-    )
+    if progress.is_solved:
+        return progress, True
+
+    progress.attempt += 1
+    attempt = Attempt(progress_id=progress.id, valeur=reponse_user.strip())
     db.session.add(attempt)
 
-    # Compare avec chaque variante
-    variantes = [v.strip() for v in enigme.response.split("|")]
-    is_correct = normalize(reponse_user) in variantes
+    is_correct = normalize(reponse_user) in [v.strip() for v in enigme.response.split("|")]
 
-    if is_correct and not progress.is_solved:
+    if is_correct:
         progress.solve()
 
     db.session.commit()
