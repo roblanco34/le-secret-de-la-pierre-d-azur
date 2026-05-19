@@ -73,9 +73,9 @@
                                             {% if p.is_solved %}td-solved{% else %}td-active{% endif %}
                                             {% if p.indice_active %}indice-on{% endif %}">
                                             {% if p.is_solved %}
-                                                ✓ {{ p.end.strftime('%H:%M') }}
+                                                ✓ {{ p.end | heure_locale }}
                                             {% else %}
-                                                ⟳ {{ p.start.strftime('%H:%M') }}
+                                                ⟳ {{ p.start | heure_locale) }}
                                             {% endif %}
                                         </button>
                                     </form>
@@ -107,7 +107,7 @@
                                         {% for a in attempts %}
                                         <li class="attempt-item {% if loop.last and item.progression.get(manche, {}).get(enigme) and item.progression.get(manche, {}).get(enigme).is_solved %}attempt-correct{% endif %}">
                                             <span class="attempt-valeur">{{ a.valeur }}</span>
-                                            <span class="attempt-date">{{ a.date.strftime('%H:%M:%S') }}</span>
+                                            <span class="attempt-date">{{ a.date | heure_locale }}</span>
                                         </li>
                                         {% endfor %}
                                     </ul>

@@ -110,7 +110,7 @@
             {% for a in attempts %}
             <li class="attempt-item {% if loop.last and progress.is_solved %}attempt-correct{% endif %}">
                 <span class="attempt-valeur">{{ a.valeur }}</span>
-                <span class="attempt-date">{{ a.date.strftime('%H:%M:%S') }}</span>
+                <span class="attempt-date">{{ a.date | heure_locale }}</span>
             </li>
             {% endfor %}
         </ul>

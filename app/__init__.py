@@ -2,7 +2,8 @@ import os
 from flask import Flask
 from .extensions import db, migrate, login_manager
 from config import config
-from .models import User, Enigme, Progress 
+from .models import User, Enigme, Progress
+from datetime import timezone, timedelta
 
 
 def create_app(config_name=None):
@@ -34,6 +35,15 @@ def create_app(config_name=None):
             return "—"
         m = secondes // 60
         return f"{m}min"
+
+    @app.template_filter("heure_locale")
+    def heure_locale_filter(dt):
+        if dt is None:
+            return "—"
+        # UTC+2 en été (CEST), UTC+1 en hiver (CET)
+        # Pour la Bretagne, ajuste selon la saison de ta chasse
+        local = dt.replace(tzinfo=timezone.utc).astimezone(timezone(timedelta(hours=2)))
+        return local.strftime('%H:%M:%S')
     
     #     #Affichage du temps en minutes et secondes
     # @app.template_filter("minutes")
