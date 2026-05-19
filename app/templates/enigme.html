@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}{{ enigme.name }} | La Pierre d'Azur{% endblock %}
+{% block title %}{{ enigme.name }} — La Pierre d'Azur{% endblock %}
 
 {% block content %}
 <div class="container">
 
-    <!-- <a href="{{ url_for('game.index') }}" class="retour">← Retour à la carte</a> -->
+    <a href="{{ url_for('game.index') }}" class="retour">← Retour à la carte</a>
 
     {% if progress and progress.indice_active and enigme.indice %}
     <div class="indice-bulle">
@@ -20,7 +20,11 @@
 
     {% if enigme.video_url %}
     <div class="video-wrapper">
-        <iframe width="560" height="315" src="{{ enigme.video_url }}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        <iframe src="{{ enigme.video_url }}"
+                title="{{ enigme.name }}"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen>
+        </iframe>
     </div>
     {% endif %}
 
@@ -30,7 +34,7 @@
 
     <div class="enigme-resolue carte carte-or">
         <div class="icone">✦</div>
-        <h2 class="text-or">{{ enigme.response.split('|')[0].upper() }}</h2>
+        <h2 class="text-or">Énigme résolue !</h2>
         <p class="temps">{{ progress.time | minutes }}</p>
         <p class="text-muted" style="font-size:0.9rem;">
             {{ progress.attempt }} tentative(s)
@@ -42,29 +46,145 @@
 
     {% else %}
 
-    <form method="POST">
-        <div class="form-group">
-            <label for="reponse">Ta réponse</label>
-            <input type="text" id="reponse" name="reponse"
-                   placeholder="Écris ta réponse…"
-                   autocomplete="off" autocorrect="off"
-                   autocapitalize="off" spellcheck="false"
-                   required autofocus>
-        </div>
-        <button type="submit" class="btn btn-azur">Soumettre la réponse</button>
-    </form>
+    <!-- Zone de réponse — affichée ou masquée selon géolocalisation -->
+    <div id="zone-geo">
 
-    {% if progress.attempt > 0 %}
-    <p class="tentatives mt-2">
-        Tentative(s) : {{ progress.attempt }}
-        {% for tentative in progress.attempts %}
-            <br>
-            ❌ {{ tentative.valeur }}
-        {% endfor %}
-    </p>
+        {% if enigme.latitude and enigme.longitude %}
+        <!-- Énigme avec coordonnées GPS -->
+        <div id="bloc-geo" class="carte carte-azur text-center">
+            <p style="font-style:italic; font-size:1rem; margin-bottom:1rem;">
+                Tu dois être sur le lieu de l'énigme pour répondre.
+            </p>
+            <button class="btn btn-azur" onclick="verifierPosition()">
+                📍 Vérifier ma position
+            </button>
+            <p id="geo-message" class="tentatives mt-2" style="display:none;"></p>
+        </div>
+
+        <div id="bloc-reponse" style="display:none;">
+            <form method="POST">
+                <div class="form-group">
+                    <label for="reponse">Ta réponse</label>
+                    <input type="text" id="reponse" name="reponse"
+                           placeholder="Écris ta réponse…"
+                           autocomplete="off" autocorrect="off"
+                           autocapitalize="off" spellcheck="false"
+                           required>
+                </div>
+                <button type="submit" class="btn btn-azur">Soumettre la réponse</button>
+            </form>
+            {% if progress.attempt > 0 %}
+            <p class="tentatives mt-2">Tentative(s) : {{ progress.attempt }}</p>
+            {% endif %}
+        </div>
+
+        {% else %}
+        <!-- Énigme sans coordonnées GPS — input direct -->
+        <form method="POST">
+            <div class="form-group">
+                <label for="reponse">Ta réponse</label>
+                <input type="text" id="reponse" name="reponse"
+                       placeholder="Écris ta réponse…"
+                       autocomplete="off" autocorrect="off"
+                       autocapitalize="off" spellcheck="false"
+                       required autofocus>
+            </div>
+            <button type="submit" class="btn btn-azur">Soumettre la réponse</button>
+        </form>
+        {% if progress.attempt > 0 %}
+        <p class="tentatives mt-2">Tentative(s) : {{ progress.attempt }}</p>
+        {% endif %}
+        {% endif %}
+
+    </div>
+
+    <!-- Tentatives du joueur -->
+    {% set attempts = progress.attempts.all() %}
+    {% if attempts %}
+    <div class="carte mt-2">
+        <h3 style="font-size:0.75rem; letter-spacing:0.08em; color:var(--texte-muted);
+                   text-transform:uppercase; margin-bottom:0.75rem;">
+            Mes tentatives
+        </h3>
+        <ul class="attempts-list">
+            {% for a in attempts %}
+            <li class="attempt-item {% if loop.last and progress.is_solved %}attempt-correct{% endif %}">
+                <span class="attempt-valeur">{{ a.valeur }}</span>
+                <span class="attempt-date">{{ a.date.strftime('%H:%M:%S') }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
     {% endif %}
 
     {% endif %}
 
 </div>
+
+{% if enigme.latitude and enigme.longitude and not progress.is_solved %}
+<script>
+const ENIGME_LATITUDE   = {{ enigme.latitude }};
+const ENIGME_LONGITUDE = {{ enigme.longitude }};
+const ENIGME_RAYON = {{ enigme.rayon }};
+
+function distanceMetres(latitude1, longitude1, latitude2, longitude2) {
+    const R = 6371000;
+    const dLat = (latitude2 - latitude1) * Math.PI / 180;
+    const dLng = (longitude2 - longitude1) * Math.PI / 180;
+    const a =
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(latitude1 * Math.PI / 180) *
+        Math.cos(latitude2 * Math.PI / 180) *
+        Math.sin(dLng/2) * Math.sin(dLng/2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function verifierPosition() {
+    const message = document.getElementById('geo-message');
+    message.style.display = 'block';
+    message.style.color   = 'var(--texte-muted)';
+    message.textContent   = 'Localisation en cours…';
+
+    if (!navigator.geolocation) {
+        message.textContent   = '❌ La géolocalisation n\'est pas supportée par ton appareil.';
+        message.style.color   = 'var(--danger)';
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            const dist = Math.round(distanceMetres(
+                position.coords.latitude,
+                position.coords.longitude,
+                ENIGME_LATITUDE,
+                ENIGME_LONGITUDE
+            ));
+
+            if (dist <= ENIGME_RAYON) {
+                // Dans le rayon — affiche l'input
+                document.getElementById('bloc-geo').style.display     = 'none';
+                document.getElementById('bloc-reponse').style.display = 'block';
+                document.getElementById('reponse').focus();
+            } else {
+                // Hors rayon — message d'erreur
+                message.textContent = `📍 Tu es trop éloigné pour répondre. Rapproche-toi !`;
+                //message.textContent = `📍 Tu es à ${dist}m du lieu. Rapproche-toi !`;
+                message.style.color = 'var(--or)';
+            }
+        },
+        (erreur) => {
+            const messages = {
+                1: '❌ Accès à la position refusé. Autorise la géolocalisation.',
+                2: '❌ Position introuvable. Vérifie ton GPS.',
+                3: '❌ Délai dépassé. Réessaie.'
+            };
+            message.textContent = messages[erreur.code] || '❌ Erreur inconnue.';
+            message.style.color = 'var(--danger)';
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+}
+</script>
+{% endif %}
+
 {% endblock %}

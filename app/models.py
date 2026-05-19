@@ -58,6 +58,9 @@ class Enigme(db.Model):
     video_url   = db.Column(db.String(255), nullable=True)
     indice      = db.Column(db.Text, nullable=True)
     response    = db.Column(db.String(255), nullable=False)
+    latitude   = db.Column(db.Float, nullable=True)
+    longitude   = db.Column(db.Float, nullable=True)
+    rayon = db.Column(db.Integer, nullable=True, default=500)
 
     manche_rel  = db.relationship("Manche", back_populates="enigmes")
     progresses  = db.relationship("Progress", back_populates="enigme", lazy="dynamic")
